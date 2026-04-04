@@ -22,7 +22,10 @@ app.config['MAX_CONTENT_LENGTH'] = config.MAX_CONTENT_LENGTH
 
 if config.USE_DB:
     from core.db import db_init
-    db_init()
+    try:
+        db_init()
+    except Exception as e:
+        print(f'WARNING: db_init() failed: {e}', flush=True)
 
 # In local dev mode ensure writable directories exist
 if not config.USE_S3:
@@ -37,6 +40,16 @@ if not config.USE_DB:
 
 def _allowed(filename, allowed_set):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_set
+
+
+@app.errorhandler(500)
+def internal_error(e):
+    import traceback
+    tb = traceback.format_exc()
+    print(tb, flush=True)
+    if request.path.startswith('/api/'):
+        return jsonify({'error': str(e), 'detail': tb}), 500
+    return f'<pre>500 Error:\n{tb}</pre>', 500
 
 
 # ─── Page routes ────────────────────────────────────────────────────────────────
@@ -54,9 +67,13 @@ def upload_page():
 @app.route('/designer')
 def designer_page():
     session_id = request.args.get('session_id', '')
-    session    = load_session(session_id) if session_id else None
-    fonts      = list(config.BUNDLED_FONTS.items())
-    templates  = list_templates()
+    try:
+        session   = load_session(session_id) if session_id else None
+        templates = list_templates()
+    except Exception as e:
+        import traceback
+        return f'<pre>Designer error:\n{traceback.format_exc()}</pre>', 500
+    fonts = list(config.BUNDLED_FONTS.items())
     return render_template('designer.html', session_id=session_id, session=session,
                            fonts=fonts, templates=templates)
 
