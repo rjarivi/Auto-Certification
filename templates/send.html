@@ -18,6 +18,19 @@
       <label class="tab-option">
         <input type="radio" name="smtpMode" value="custom" /> Custom SMTP
       </label>
+      {% if ses_configured %}
+      <label class="tab-option">
+        <input type="radio" name="smtpMode" value="ses" /> AWS SES
+      </label>
+      {% endif %}
+    </div>
+
+    <!-- AWS SES mode -->
+    <div id="sesFields" style="display:none">
+      <div class="alert alert-success" style="margin-bottom:1rem">
+        AWS SES is configured on the server. Your verified sender email will be used automatically —
+        no credentials required here.
+      </div>
     </div>
 
     <!-- Gmail mode -->

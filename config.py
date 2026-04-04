@@ -1,14 +1,36 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()  # no-op in production where env vars are already set
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-UPLOAD_FOLDER    = os.path.join(BASE_DIR, 'uploads', 'excel')
-BACKGROUND_FOLDER = os.path.join(BASE_DIR, 'assets', 'backgrounds')
-TEMPLATE_FOLDER  = os.path.join(BASE_DIR, 'data', 'templates')
-SESSION_FOLDER   = os.path.join(BASE_DIR, 'data', 'sessions')
-OUTPUT_FOLDER    = os.path.join(BASE_DIR, 'output')
-FONT_FOLDER      = os.path.join(BASE_DIR, 'static', 'fonts')
+# ── Database ──────────────────────────────────────────────────────────────────
+DATABASE_URL = os.environ.get('DATABASE_URL', '')
 
+# ── AWS / S3 ──────────────────────────────────────────────────────────────────
+AWS_ACCESS_KEY_ID     = os.environ.get('AWS_ACCESS_KEY_ID', '')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', '')
+AWS_REGION            = os.environ.get('AWS_REGION', 'us-east-1')
+S3_BUCKET_NAME        = os.environ.get('S3_BUCKET_NAME', '')
+
+# ── AWS SES ───────────────────────────────────────────────────────────────────
+SES_REGION     = os.environ.get('SES_REGION', AWS_REGION)
+SES_FROM_EMAIL = os.environ.get('SES_FROM_EMAIL', '')
+
+# ── Feature flags ─────────────────────────────────────────────────────────────
+USE_S3 = bool(S3_BUCKET_NAME)
+USE_DB = bool(DATABASE_URL)
+
+# ── Local-dev fallback paths (used only when USE_S3 / USE_DB are False) ───────
+UPLOAD_FOLDER     = os.path.join(BASE_DIR, 'uploads', 'excel')
+BACKGROUND_FOLDER = os.path.join(BASE_DIR, 'assets', 'backgrounds')
+TEMPLATE_FOLDER   = os.path.join(BASE_DIR, 'data', 'templates')
+SESSION_FOLDER    = os.path.join(BASE_DIR, 'data', 'sessions')
+OUTPUT_FOLDER     = os.path.join(BASE_DIR, 'output')
+FONT_FOLDER       = os.path.join(BASE_DIR, 'static', 'fonts')
+
+# ── Upload limits & allowed types ─────────────────────────────────────────────
 MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB
 
 ALLOWED_EXCEL_EXTENSIONS = {'xlsx', 'xls'}
@@ -16,7 +38,7 @@ ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 REQUIRED_COLUMNS = ['Name', 'Email', 'Course/Event', 'Date']
 
-# Fonts bundled with the app (filename without extension → display name)
+# ── Bundled fonts (filename without extension → display name) ─────────────────
 BUNDLED_FONTS = {
     'DejaVuSerif':        'DejaVu Serif',
     'DejaVuSerif-Bold':   'DejaVu Serif Bold',

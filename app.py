@@ -1,25 +1,38 @@
 import os
 import re
 import uuid
+import tempfile
 from flask import (Flask, render_template, request, jsonify,
                    send_from_directory, Response, stream_with_context)
 from werkzeug.utils import secure_filename
 
 import config
 from core.excel_parser import parse_excel
-from core.certificate_generator import render_one, render_all
+from core.certificate_generator import render_one, render_to_bytes
 from core.email_sender import send_all_sse
 from core.template_manager import (save_template, load_template, list_templates,
                                     create_session, load_session, update_session)
+from core import storage
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-change-in-prod')
 app.config['MAX_CONTENT_LENGTH'] = config.MAX_CONTENT_LENGTH
 
-# Ensure required directories exist
-for d in [config.UPLOAD_FOLDER, config.BACKGROUND_FOLDER, config.TEMPLATE_FOLDER,
-          config.SESSION_FOLDER, config.OUTPUT_FOLDER, config.FONT_FOLDER]:
-    os.makedirs(d, exist_ok=True)
+# ── Startup ───────────────────────────────────────────────────────────────────
+
+if config.USE_DB:
+    from core.db import db_init
+    db_init()
+
+# In local dev mode ensure writable directories exist
+if not config.USE_S3:
+    for d in [config.UPLOAD_FOLDER, config.BACKGROUND_FOLDER,
+              config.OUTPUT_FOLDER, config.FONT_FOLDER]:
+        os.makedirs(d, exist_ok=True)
+
+if not config.USE_DB:
+    for d in [config.TEMPLATE_FOLDER, config.SESSION_FOLDER]:
+        os.makedirs(d, exist_ok=True)
 
 
 def _allowed(filename, allowed_set):
@@ -41,9 +54,9 @@ def upload_page():
 @app.route('/designer')
 def designer_page():
     session_id = request.args.get('session_id', '')
-    session = load_session(session_id) if session_id else None
-    fonts = list(config.BUNDLED_FONTS.items())  # [(filename, display_name), ...]
-    templates = list_templates()
+    session    = load_session(session_id) if session_id else None
+    fonts      = list(config.BUNDLED_FONTS.items())
+    templates  = list_templates()
     return render_template('designer.html', session_id=session_id, session=session,
                            fonts=fonts, templates=templates)
 
@@ -51,15 +64,17 @@ def designer_page():
 @app.route('/preview')
 def preview_page():
     session_id = request.args.get('session_id', '')
-    session = load_session(session_id) if session_id else None
+    session    = load_session(session_id) if session_id else None
     return render_template('preview.html', session_id=session_id, session=session)
 
 
 @app.route('/send')
 def send_page():
     session_id = request.args.get('session_id', '')
-    session = load_session(session_id) if session_id else None
-    return render_template('send.html', session_id=session_id, session=session)
+    session    = load_session(session_id) if session_id else None
+    ses_configured = bool(config.SES_FROM_EMAIL)
+    return render_template('send.html', session_id=session_id, session=session,
+                           ses_configured=ses_configured)
 
 
 # ─── API routes ─────────────────────────────────────────────────────────────────
@@ -75,20 +90,33 @@ def api_upload_excel():
         return jsonify({'error': 'Only .xlsx / .xls files allowed'}), 400
 
     filename = secure_filename(f.filename)
-    filepath = os.path.join(config.UPLOAD_FOLDER, f'{uuid.uuid4()}_{filename}')
-    f.save(filepath)
 
-    result = parse_excel(filepath)
+    if config.USE_S3:
+        # Save to a temp file for parsing, then upload to S3
+        with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as tmp:
+            f.save(tmp.name)
+            tmp_path = tmp.name
+        result = parse_excel(tmp_path)
+        s3_key = f'uploads/{uuid.uuid4()}_{filename}'
+        storage.upload_file(tmp_path, s3_key)
+        os.unlink(tmp_path)
+        excel_key = s3_key
+    else:
+        filepath = os.path.join(config.UPLOAD_FOLDER, f'{uuid.uuid4()}_{filename}')
+        f.save(filepath)
+        result = parse_excel(filepath)
+        excel_key = filepath
+
     if not result['rows'] and result['errors']:
         return jsonify({'errors': result['errors']}), 422
 
-    session_id = create_session(filepath, result['rows'])
+    session_id = create_session(excel_key, result['rows'])
     return jsonify({
-        'session_id': session_id,
-        'row_count': len(result['rows']),
-        'columns': result['columns'],
+        'session_id':   session_id,
+        'row_count':    len(result['rows']),
+        'columns':      result['columns'],
         'preview_rows': result['rows'][:10],
-        'errors': result['errors'],
+        'errors':       result['errors'],
     })
 
 
@@ -102,11 +130,7 @@ def api_session(session_id):
 
 @app.route('/api/backgrounds')
 def api_backgrounds():
-    items = []
-    for fname in os.listdir(config.BACKGROUND_FOLDER):
-        if fname.rsplit('.', 1)[-1].lower() in config.ALLOWED_IMAGE_EXTENSIONS:
-            items.append({'filename': fname, 'url': f'/assets/backgrounds/{fname}'})
-    return jsonify(items)
+    return jsonify(storage.list_files('backgrounds/'))
 
 
 @app.route('/api/upload-background', methods=['POST'])
@@ -117,9 +141,9 @@ def api_upload_background():
     if not _allowed(f.filename, config.ALLOWED_IMAGE_EXTENSIONS):
         return jsonify({'error': 'Only PNG/JPG allowed'}), 400
     filename = secure_filename(f.filename)
-    save_path = os.path.join(config.BACKGROUND_FOLDER, filename)
-    f.save(save_path)
-    return jsonify({'filename': filename, 'url': f'/assets/backgrounds/{filename}'})
+    s3_key   = f'backgrounds/{filename}'
+    url      = storage.upload_bytes(f.read(), s3_key, content_type=f.content_type or 'image/png')
+    return jsonify({'filename': filename, 'url': url})
 
 
 @app.route('/api/save-template', methods=['POST'])
@@ -128,7 +152,7 @@ def api_save_template():
     if not data:
         return jsonify({'error': 'No data'}), 400
     template_id = save_template(data)
-    session_id = data.get('session_id')
+    session_id  = data.get('session_id')
     if session_id:
         update_session(session_id, 'template_id', template_id)
     return jsonify({'template_id': template_id})
@@ -142,7 +166,7 @@ def api_templates():
 @app.route('/api/preview-certificate')
 def api_preview_certificate():
     session_id = request.args.get('session_id')
-    row_index = int(request.args.get('row_index', 0))
+    row_index  = int(request.args.get('row_index', 0))
 
     session = load_session(session_id)
     if not session:
@@ -160,29 +184,40 @@ def api_preview_certificate():
     if not rows:
         return jsonify({'error': 'No data rows'}), 400
 
-    row = rows[min(row_index, len(rows) - 1)]
+    row       = rows[min(row_index, len(rows) - 1)]
     safe_name = re.sub(r'[^\w\s-]', '', row.get('Name', 'preview')).strip().replace(' ', '_')
-    out_path = os.path.join(config.OUTPUT_FOLDER, session_id, f'preview_{row_index}_{safe_name}.png')
 
     try:
-        render_one(template, row, out_path)
+        if config.USE_S3:
+            png_bytes = render_to_bytes(template, row)
+            s3_key    = f'outputs/{session_id}/preview_{row_index}_{safe_name}.png'
+            image_url = storage.upload_bytes(png_bytes, s3_key, 'image/png')
+        else:
+            out_path  = os.path.join(config.OUTPUT_FOLDER, session_id,
+                                     f'preview_{row_index}_{safe_name}.png')
+            render_one(template, row, out_path)
+            rel = os.path.relpath(out_path, config.OUTPUT_FOLDER)
+            image_url = f'/output/{rel.replace(os.sep, "/")}'
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-    rel_path = os.path.relpath(out_path, config.OUTPUT_FOLDER)
     return jsonify({
-        'image_url': f'/output/{rel_path.replace(os.sep, "/")}',
+        'image_url':      image_url,
         'recipient_name': row.get('Name', ''),
-        'row_index': row_index,
-        'total': len(rows),
+        'row_index':      row_index,
+        'total':          len(rows),
     })
 
 
 @app.route('/api/send-certificates', methods=['POST'])
 def api_send_certificates():
-    data = request.get_json()
-    session_id = data.get('session_id')
+    data        = request.get_json()
+    session_id  = data.get('session_id')
     smtp_config = data.get('smtp', {})
+
+    # If SES mode, inject server-side sender email
+    if smtp_config.get('mode') == 'ses':
+        smtp_config['sender_email'] = config.SES_FROM_EMAIL
 
     session = load_session(session_id)
     if not session:
@@ -190,23 +225,34 @@ def api_send_certificates():
                         mimetype='text/event-stream')
 
     template_id = session.get('template_id')
-    template = load_template(template_id) if template_id else None
+    template    = load_template(template_id) if template_id else None
     if not template:
         return Response('data: {"type":"error","message":"No template configured"}\n\n',
                         mimetype='text/event-stream')
 
     rows = session.get('rows', [])
-    out_dir = os.path.join(config.OUTPUT_FOLDER, session_id)
-    os.makedirs(out_dir, exist_ok=True)
+
+    if not config.USE_S3:
+        out_dir = os.path.join(config.OUTPUT_FOLDER, session_id)
+        os.makedirs(out_dir, exist_ok=True)
 
     def render_fn(row):
         safe = re.sub(r'[^\w\s-]', '', row.get('Name', 'cert')).strip().replace(' ', '_')
-        path = os.path.join(out_dir, f'{safe}.png')
-        try:
-            render_one(template, row, path)
-            return path, None
-        except Exception as e:
-            return None, str(e)
+        if config.USE_S3:
+            try:
+                png_bytes = render_to_bytes(template, row)
+                s3_key    = f'outputs/{session_id}/{safe}.png'
+                storage.upload_bytes(png_bytes, s3_key, 'image/png')
+                return png_bytes, None   # return bytes so email_sender attaches in-memory
+            except Exception as e:
+                return None, str(e)
+        else:
+            path = os.path.join(out_dir, f'{safe}.png')
+            try:
+                render_one(template, row, path)
+                return path, None
+            except Exception as e:
+                return None, str(e)
 
     def generate():
         yield ': keep-alive\n\n'
@@ -217,16 +263,21 @@ def api_send_certificates():
                     headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
 
 
-# ─── Static file serving ────────────────────────────────────────────────────────
+# ─── Static file serving (local dev only) ────────────────────────────────────
 
-@app.route('/output/<path:filename>')
-def serve_output(filename):
-    return send_from_directory(config.OUTPUT_FOLDER, filename)
+if not config.USE_S3:
+    @app.route('/backgrounds/<filename>')
+    def serve_background_local(filename):
+        return send_from_directory(config.BACKGROUND_FOLDER, filename)
 
+    @app.route('/output/<path:filename>')
+    def serve_output_local(filename):
+        return send_from_directory(config.OUTPUT_FOLDER, filename)
 
-@app.route('/assets/backgrounds/<filename>')
-def serve_background(filename):
-    return send_from_directory(config.BACKGROUND_FOLDER, filename)
+    # Keep legacy /assets/backgrounds/ URL working for local dev
+    @app.route('/assets/backgrounds/<filename>')
+    def serve_background_legacy(filename):
+        return send_from_directory(config.BACKGROUND_FOLDER, filename)
 
 
 if __name__ == '__main__':

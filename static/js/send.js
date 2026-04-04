@@ -15,9 +15,11 @@
   // Mode toggle
   document.querySelectorAll('input[name="smtpMode"]').forEach(radio => {
     radio.addEventListener('change', () => {
-      const isGmail = radio.value === 'gmail';
-      document.getElementById('gmailFields').style.display  = isGmail ? 'block' : 'none';
-      document.getElementById('customFields').style.display = isGmail ? 'none'  : 'block';
+      const mode = radio.value;
+      document.getElementById('gmailFields').style.display  = mode === 'gmail'  ? 'block' : 'none';
+      document.getElementById('customFields').style.display = mode === 'custom' ? 'block' : 'none';
+      const sesEl = document.getElementById('sesFields');
+      if (sesEl) sesEl.style.display = mode === 'ses' ? 'block' : 'none';
     });
   });
 
@@ -37,6 +39,8 @@
     if (mode === 'gmail') {
       base.sender_email = document.getElementById('gmailAddress').value.trim();
       base.app_password = document.getElementById('gmailAppPass').value.trim();
+    } else if (mode === 'ses') {
+      // SES sender comes from server env — nothing to collect here
     } else {
       base.sender_email = document.getElementById('smtpUser').value.trim();
       base.host         = document.getElementById('smtpHost').value.trim();
@@ -49,6 +53,7 @@
   }
 
   function validate(cfg) {
+    if (cfg.mode === 'ses') return null;  // credentials are server-side
     if (!cfg.sender_email) return 'Sender email is required.';
     if (cfg.mode === 'gmail' && !cfg.app_password) return 'Gmail App Password is required.';
     if (cfg.mode === 'custom' && !cfg.host) return 'SMTP Host is required.';
@@ -65,7 +70,8 @@
     progressSec.style.display = 'block';
     statusList.innerHTML  = '';
     progressFill.style.width = '0%';
-    progressSum.textContent  = 'Connecting to SMTP…';
+    const mode = document.querySelector('input[name="smtpMode"]:checked').value;
+    progressSum.textContent = mode === 'ses' ? 'Connecting to AWS SES…' : 'Connecting to SMTP…';
 
     fetch('/api/send-certificates', {
       method:  'POST',
