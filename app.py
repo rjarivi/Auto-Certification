@@ -27,6 +27,13 @@ if config.USE_DB:
     except Exception as e:
         print(f'WARNING: db_init() failed: {e}', flush=True)
 
+try:
+    from core.builtin_templates import ensure_builtins_registered
+    ensure_builtins_registered()
+except Exception as e:
+    import traceback
+    print(f'WARNING: ensure_builtins_registered() failed: {traceback.format_exc()}', flush=True)
+
 # In local dev mode ensure writable directories exist
 if not config.USE_S3:
     for d in [config.UPLOAD_FOLDER, config.BACKGROUND_FOLDER,
@@ -83,6 +90,12 @@ def preview_page():
     session_id = request.args.get('session_id', '')
     session    = load_session(session_id) if session_id else None
     return render_template('preview.html', session_id=session_id, session=session)
+
+
+@app.route('/templates')
+def gallery_page():
+    session_id = request.args.get('session_id', '')
+    return render_template('gallery.html', session_id=session_id, show_steps=False)
 
 
 @app.route('/send')
@@ -213,6 +226,34 @@ def api_templates():
     return jsonify(list_templates())
 
 
+@app.route('/api/builtin-templates')
+def api_builtin_templates():
+    from core.builtin_templates import BUILTIN_TEMPLATES
+    result = []
+    for tmpl in BUILTIN_TEMPLATES:
+        result.append({
+            'template_id': tmpl['template_id'],
+            'name':        tmpl['name'],
+            'category':    tmpl['category'],
+            'orientation': tmpl['orientation'],
+            'width':       tmpl['width'],
+            'height':      tmpl['height'],
+            'thumb_url':   storage.get_url(tmpl['thumb_key']),
+        })
+    return jsonify(result)
+
+
+@app.route('/api/template/<template_id>')
+def api_get_template(template_id):
+    template = load_template(template_id)
+    if not template:
+        return jsonify({'error': 'Template not found'}), 404
+    bg_id = template.get('background_id', '')
+    if bg_id:
+        template['background_url'] = storage.get_url(f'backgrounds/{bg_id}')
+    return jsonify(template)
+
+
 @app.route('/api/preview-certificate')
 def api_preview_certificate():
     session_id = request.args.get('session_id')
@@ -316,6 +357,11 @@ def api_send_certificates():
 # ─── Static file serving (local dev only) ────────────────────────────────────
 
 if not config.USE_S3:
+    @app.route('/builtin_thumbs/<filename>')
+    def serve_builtin_thumb(filename):
+        thumb_dir = os.path.join(config.BASE_DIR, 'builtin_thumbs')
+        return send_from_directory(thumb_dir, filename)
+
     @app.route('/backgrounds/<filename>')
     def serve_background_local(filename):
         return send_from_directory(config.BACKGROUND_FOLDER, filename)

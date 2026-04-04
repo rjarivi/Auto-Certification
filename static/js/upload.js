@@ -98,6 +98,13 @@
   }
 
   proceedBtn.addEventListener('click', () => {
-    if (sessionId) window.location.href = `/designer?session_id=${sessionId}`;
+    if (!sessionId) return;
+    const pendingTemplate = localStorage.getItem('pendingTemplate');
+    if (pendingTemplate) {
+      localStorage.removeItem('pendingTemplate');
+      window.location.href = `/designer?session_id=${sessionId}&load_template=${pendingTemplate}`;
+    } else {
+      window.location.href = `/designer?session_id=${sessionId}`;
+    }
   });
 })();

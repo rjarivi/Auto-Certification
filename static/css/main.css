@@ -665,3 +665,163 @@ tr:hover td { background: var(--surface-2); }
   .form-row      { flex-direction: column; gap: 0; }
   .tab-group     { flex-wrap: wrap; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   TEMPLATE GALLERY
+═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Filter chips ────────────────────────────────────────────────────────────── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.32rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid var(--border-hi);
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.chip:hover  { border-color: var(--accent); color: var(--accent); }
+.chip.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+/* Category colour chips (inside cards — read-only) */
+.chip-cat {
+  font-size: 0.72rem;
+  padding: 0.2rem 0.6rem;
+  cursor: default;
+  pointer-events: none;
+}
+.chip-cat--classic      { background: rgba(184,134,11,0.12);  color: #D4AF37; border-color: rgba(184,134,11,0.3); }
+.chip-cat--modern       { background: rgba(100,116,139,0.12); color: #94A3B8; border-color: rgba(100,116,139,0.3); }
+.chip-cat--corporate    { background: rgba(10,35,66,0.25);    color: #7FB3D3; border-color: rgba(127,179,211,0.3); }
+.chip-cat--appreciation { background: rgba(194,24,91,0.1);    color: #F48FB1; border-color: rgba(194,24,91,0.3); }
+
+/* ── Gallery page layout ─────────────────────────────────────────────────────── */
+.gallery-page { max-width: 1280px; }
+
+.gallery-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+}
+.gallery-header h2   { margin-bottom: 0.3rem; }
+.gallery-header > .btn { flex-shrink: 0; align-self: flex-start; margin-top: 0.3rem; }
+
+.gallery-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.filter-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+/* ── Gallery grid ────────────────────────────────────────────────────────────── */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+.gallery-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-2);
+  font-size: 0.9rem;
+  padding: 2rem 0;
+  grid-column: 1 / -1;
+}
+.gallery-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem 0;
+}
+
+/* ── Gallery card ────────────────────────────────────────────────────────────── */
+.gallery-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+}
+.gallery-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent);
+  box-shadow: 0 8px 32px rgba(200,146,58,0.15);
+}
+.gallery-thumb-wrap {
+  overflow: hidden;
+  background: var(--surface-3);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Landscape cards: fixed aspect ratio */
+.gallery-card--horizontal .gallery-thumb-wrap { aspect-ratio: 600 / 424; }
+/* Portrait cards: fixed aspect ratio */
+.gallery-card--vertical   .gallery-thumb-wrap { aspect-ratio: 424 / 600; max-height: 300px; }
+
+.gallery-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+.gallery-card:hover .gallery-thumb { transform: scale(1.03); }
+
+.gallery-card-body {
+  padding: 1rem 1.1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  flex: 1;
+}
+.gallery-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+.gallery-orient-label {
+  font-size: 0.75rem;
+  color: var(--text-3);
+}
+.gallery-card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.3;
+}
+.gallery-use-btn { margin-top: auto; width: 100%; justify-content: center; }
+
+@media (max-width: 640px) {
+  .gallery-grid { grid-template-columns: 1fr; }
+  .gallery-header { flex-direction: column; }
+}

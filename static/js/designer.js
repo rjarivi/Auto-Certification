@@ -270,6 +270,48 @@
   canvas.addEventListener('mouseup', () => { dragging = false; canvas.style.cursor = 'default'; });
   canvas.addEventListener('mouseleave', () => { dragging = false; });
 
+  // ── Load built-in template ───────────────────────────────────────────────────
+  function applyBuiltinTemplate(tmpl) {
+    // Canvas dimensions
+    const w = tmpl.width  || 1200;
+    const h = tmpl.height || 850;
+    canvas.width  = w;
+    canvas.height = h;
+    document.getElementById('canvasW').value = w;
+    document.getElementById('canvasH').value = h;
+
+    // Template name
+    if (tmpl.name) {
+      document.getElementById('templateName').value = tmpl.name;
+    }
+
+    // Background
+    if (tmpl.background_url) {
+      bgFilename = tmpl.background_id || '';
+      loadBackground(tmpl.background_url);
+    }
+
+    // Text fields
+    fields = [];
+    selectedIdx = -1;
+    if (tmpl.text_fields && tmpl.text_fields.length) {
+      tmpl.text_fields.forEach(f => {
+        fields.push({
+          id:          f.id || ('field_' + Date.now() + '_' + Math.random().toString(36).slice(2)),
+          variable:    f.variable    || '{{Name}}',
+          font_family: f.font_family || (FONTS.length ? FONTS[0][0] : 'DejaVuSerif'),
+          font_size:   f.font_size   || 36,
+          color_hex:   f.color_hex   || '#000000',
+          align:       f.align       || 'center',
+          x_percent:   f.x_percent   ?? 50,
+          y_percent:   f.y_percent   ?? 50,
+        });
+      });
+    }
+    renderFieldList();
+    redraw();
+  }
+
   // ── Save Template ─────────────────────────────────────────────────────────────
   document.getElementById('saveTemplateBtn').addEventListener('click', () => {
     const name = document.getElementById('templateName').value.trim() || 'My Certificate';
@@ -301,9 +343,28 @@
       });
   });
 
-  // Default starter fields
-  addField({ variable: '{{Name}}',         y_percent: 52, font_size: 54 });
-  addField({ variable: '{{Course/Event}}', y_percent: 62, font_size: 36 });
-  addField({ variable: '{{Date}}',         y_percent: 71, font_size: 28, color_hex: '#64748B' });
-  selectField(0);
+  // ── Initialise fields (default or from ?load_template=) ─────────────────────
+  const _loadTemplateId = new URLSearchParams(window.location.search).get('load_template');
+
+  if (_loadTemplateId) {
+    fetch(`/api/template/${_loadTemplateId}`)
+      .then(r => {
+        if (!r.ok) throw new Error('not found');
+        return r.json();
+      })
+      .then(tmpl => applyBuiltinTemplate(tmpl))
+      .catch(() => {
+        // Fall back to defaults if template fetch fails
+        _addDefaultFields();
+      });
+  } else {
+    _addDefaultFields();
+  }
+
+  function _addDefaultFields() {
+    addField({ variable: '{{Name}}',         y_percent: 52, font_size: 54 });
+    addField({ variable: '{{Course/Event}}', y_percent: 62, font_size: 36 });
+    addField({ variable: '{{Date}}',         y_percent: 71, font_size: 28, color_hex: '#64748B' });
+    selectField(0);
+  }
 })();

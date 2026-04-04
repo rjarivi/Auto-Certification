@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% set show_steps = false %}
+{% block title %}Template Gallery — CertifyAuto{% endblock %}
+
+{% block content %}
+<div class="page-card gallery-page">
+
+  <div class="gallery-header">
+    <div>
+      <h2>Certificate Templates</h2>
+      <p class="text-muted">Choose a professional template. Fonts, colors and positions are fully editable in the designer.</p>
+    </div>
+    {% if session_id %}
+    <a href="/designer?session_id={{ session_id }}" class="btn btn-ghost btn-sm">← Back to Designer</a>
+    {% else %}
+    <a href="/upload" class="btn btn-primary btn-sm">Upload Excel to Start →</a>
+    {% endif %}
+  </div>
+
+  <!-- Filters -->
+  <div class="gallery-filters">
+    <div class="filter-group">
+      <span class="filter-label">Category</span>
+      <button class="chip active" data-filter="category" data-value="all">All</button>
+      <button class="chip" data-filter="category" data-value="classic">Classic</button>
+      <button class="chip" data-filter="category" data-value="modern">Modern</button>
+      <button class="chip" data-filter="category" data-value="corporate">Corporate</button>
+      <button class="chip" data-filter="category" data-value="appreciation">Appreciation</button>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Orientation</span>
+      <button class="chip active" data-filter="orientation" data-value="all">All</button>
+      <button class="chip" data-filter="orientation" data-value="horizontal">↔ Landscape</button>
+      <button class="chip" data-filter="orientation" data-value="vertical">↕ Portrait</button>
+    </div>
+  </div>
+
+  <!-- Grid -->
+  <div class="gallery-grid" id="galleryGrid">
+    <div class="gallery-loading">
+      <div class="spinner"></div>
+      <span>Loading templates…</span>
+    </div>
+  </div>
+
+</div>
+
+<input type="hidden" id="sessionId" value="{{ session_id }}" />
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/gallery.js"></script>
+{% endblock %}
