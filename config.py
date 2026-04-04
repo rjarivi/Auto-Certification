@@ -8,11 +8,19 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # ── Database ──────────────────────────────────────────────────────────────────
 DATABASE_URL = os.environ.get('DATABASE_URL', '')
 
-# ── AWS / S3 ──────────────────────────────────────────────────────────────────
+# ── Object storage (AWS S3 or Cloudflare R2) ──────────────────────────────────
+# Works for both — R2 is S3-compatible.
+# For AWS S3:  set AWS_REGION + S3_BUCKET_NAME, leave STORAGE_ENDPOINT_URL blank.
+# For R2:      set STORAGE_ENDPOINT_URL, STORAGE_PUBLIC_URL, S3_BUCKET_NAME,
+#              and use R2 API credentials for AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY.
 AWS_ACCESS_KEY_ID     = os.environ.get('AWS_ACCESS_KEY_ID', '')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', '')
-AWS_REGION            = os.environ.get('AWS_REGION', 'us-east-1')
+AWS_REGION            = os.environ.get('AWS_REGION', 'auto')
 S3_BUCKET_NAME        = os.environ.get('S3_BUCKET_NAME', '')
+
+# R2-specific: endpoint and public URL (leave blank when using plain AWS S3)
+STORAGE_ENDPOINT_URL = os.environ.get('STORAGE_ENDPOINT_URL', '')   # e.g. https://<id>.r2.cloudflarestorage.com
+STORAGE_PUBLIC_URL   = os.environ.get('STORAGE_PUBLIC_URL', '')     # e.g. https://pub-xxx.r2.dev  (no trailing slash)
 
 # ── AWS SES ───────────────────────────────────────────────────────────────────
 SES_REGION     = os.environ.get('SES_REGION', AWS_REGION)

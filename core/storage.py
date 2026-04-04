@@ -1,8 +1,11 @@
 """
 Storage abstraction layer.
 
-When config.USE_S3 is True  → all operations go through AWS S3.
-When config.USE_S3 is False → falls back to local disk (dev mode).
+Supports three modes selected automatically from environment variables:
+  - Local disk (dev)  : USE_S3=False  → reads/writes to local filesystem
+  - AWS S3            : S3_BUCKET_NAME set, STORAGE_ENDPOINT_URL blank
+  - Cloudflare R2     : S3_BUCKET_NAME + STORAGE_ENDPOINT_URL + STORAGE_PUBLIC_URL set
+                        (R2 is S3-compatible; boto3 just needs an endpoint_url)
 """
 import os
 import io
@@ -16,20 +19,34 @@ def _client():
     global _s3_client
     if _s3_client is None:
         import boto3
-        _s3_client = boto3.client(
-            's3',
-            region_name=config.AWS_REGION,
+        kwargs = dict(
             aws_access_key_id=config.AWS_ACCESS_KEY_ID,
             aws_secret_access_key=config.AWS_SECRET_ACCESS_KEY,
+            region_name=config.AWS_REGION,
         )
+        if config.STORAGE_ENDPOINT_URL:
+            # Cloudflare R2 (or any S3-compatible provider)
+            kwargs['endpoint_url'] = config.STORAGE_ENDPOINT_URL
+        _s3_client = boto3.client('s3', **kwargs)
     return _s3_client
 
 
 def get_url(s3_key: str) -> str:
-    """Return the public URL for an S3 object (no API call)."""
+    """Return the public URL for a stored object (no API call)."""
     if not config.USE_S3:
         return '/' + s3_key
+    if config.STORAGE_PUBLIC_URL:
+        # R2 public bucket URL or custom domain
+        return f'{config.STORAGE_PUBLIC_URL}/{s3_key}'
+    # Default AWS S3 URL
     return f'https://{config.S3_BUCKET_NAME}.s3.{config.AWS_REGION}.amazonaws.com/{s3_key}'
+
+
+def _extra_args():
+    """ACL is not supported by R2; only pass it for plain AWS S3."""
+    if config.STORAGE_ENDPOINT_URL:
+        return {}
+    return {'ACL': 'public-read'}
 
 
 def upload_file(local_path: str, s3_key: str) -> str:
@@ -40,12 +57,9 @@ def upload_file(local_path: str, s3_key: str) -> str:
         import shutil
         shutil.copy2(local_path, dest)
         return get_url(s3_key)
-    _client().upload_file(
-        local_path,
-        config.S3_BUCKET_NAME,
-        s3_key,
-        ExtraArgs={'ACL': 'public-read'},
-    )
+    extra = _extra_args()
+    _client().upload_file(local_path, config.S3_BUCKET_NAME, s3_key,
+                          ExtraArgs=extra if extra else None)
     return get_url(s3_key)
 
 
@@ -57,13 +71,9 @@ def upload_bytes(data: bytes, s3_key: str, content_type: str = 'application/octe
         with open(dest, 'wb') as f:
             f.write(data)
         return get_url(s3_key)
-    _client().put_object(
-        Bucket=config.S3_BUCKET_NAME,
-        Key=s3_key,
-        Body=data,
-        ContentType=content_type,
-        ACL='public-read',
-    )
+    kwargs = dict(Bucket=config.S3_BUCKET_NAME, Key=s3_key, Body=data, ContentType=content_type)
+    kwargs.update(_extra_args())
+    _client().put_object(**kwargs)
     return get_url(s3_key)
 
 
