@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% set show_steps = false %}
+{% block title %}Auto-Certification – Home{% endblock %}
+
+{% block content %}
+<div class="hero">
+  <div class="hero-icon">🎓</div>
+  <h1>Auto-Certification</h1>
+  <p class="hero-sub">Upload an Excel file, design a beautiful certificate, and email everyone automatically.</p>
+  <a href="/upload" class="btn btn-primary btn-lg">Get Started</a>
+</div>
+
+<div class="features">
+  <div class="feature-card">
+    <div class="feature-icon">📊</div>
+    <h3>Upload Excel</h3>
+    <p>Provide a spreadsheet with Name, Email, Course/Event, and Date columns.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">🎨</div>
+    <h3>Design Template</h3>
+    <p>Upload a background image and drag text fields to position them visually.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">👁️</div>
+    <h3>Preview</h3>
+    <p>See how each certificate will look before sending.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">📧</div>
+    <h3>Send Emails</h3>
+    <p>Enter your SMTP or Gmail credentials and send personalized certificates in one click.</p>
+  </div>
+</div>
+{% endblock %}

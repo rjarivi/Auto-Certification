@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% set active_step = 'upload' %}
+{% set active_step_index = 0 %}
+{% block title %}Upload Excel – Auto-Certification{% endblock %}
+
+{% block content %}
+<div class="page-card">
+  <h2>Step 1: Upload Your Excel File</h2>
+  <p class="text-muted">Your spreadsheet must include these columns: <strong>Name, Email, Course/Event, Date</strong></p>
+
+  <div class="upload-zone" id="dropZone">
+    <div class="upload-icon">📂</div>
+    <p>Drag &amp; drop your <strong>.xlsx</strong> file here, or</p>
+    <label class="btn btn-outline" for="fileInput">Browse File</label>
+    <input type="file" id="fileInput" accept=".xlsx,.xls" hidden />
+    <p class="text-small text-muted">Max size: 16 MB</p>
+  </div>
+
+  <div id="errors" class="alert alert-error" style="display:none"></div>
+  <div id="loader" class="loader" style="display:none">
+    <div class="spinner"></div> Parsing file…
+  </div>
+
+  <div id="resultSection" style="display:none">
+    <div class="result-header">
+      <span id="rowCount" class="badge badge-success"></span>
+      <span id="warnCount" class="badge badge-warn" style="display:none"></span>
+    </div>
+    <div class="table-wrap">
+      <table id="dataTable">
+        <thead><tr id="tableHead"></tr></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <div class="action-row">
+      <button id="proceedBtn" class="btn btn-primary">Continue to Designer →</button>
+    </div>
+  </div>
+
+  <div class="sample-download">
+    <a href="/static/sample_data.xlsx" download class="btn btn-outline btn-sm">⬇ Download Sample Excel</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/upload.js"></script>
+{% endblock %}

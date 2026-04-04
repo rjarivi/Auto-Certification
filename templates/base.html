@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Auto-Certification{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/main.css" />
+</head>
+<body>
+  <header class="app-header">
+    <a href="/" class="logo">
+      <span class="logo-icon">🎓</span>
+      <span>Auto-Certification</span>
+    </a>
+  </header>
+
+  {% if show_steps is not defined or show_steps %}
+  <nav class="steps-nav">
+    {% set steps = [('upload', 'Upload Excel', '/upload'), ('designer', 'Design Template', '/designer'), ('preview', 'Preview', '/preview'), ('send', 'Send Emails', '/send')] %}
+    {% for key, label, href in steps %}
+    <div class="step {% if active_step == key %}active{% elif active_step_index is defined and loop.index0 < active_step_index %}done{% endif %}">
+      <div class="step-circle">{{ loop.index }}</div>
+      <span class="step-label">{{ label }}</span>
+    </div>
+    {% if not loop.last %}<div class="step-connector"></div>{% endif %}
+    {% endfor %}
+  </nav>
+  {% endif %}
+
+  <main class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="app-footer">
+    <p>Auto-Certification &mdash; Generate &amp; send certificates in minutes.</p>
+  </footer>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

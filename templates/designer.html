@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% set active_step = 'designer' %}
+{% set active_step_index = 1 %}
+{% block title %}Design Template – Auto-Certification{% endblock %}
+
+{% block content %}
+<div class="designer-layout">
+  <!-- Sidebar -->
+  <aside class="designer-sidebar">
+    <h2>Template Designer</h2>
+
+    <section class="sidebar-section">
+      <h4>Background Image</h4>
+      <div class="bg-upload-row">
+        <label class="btn btn-outline btn-sm" for="bgInput">Upload Background</label>
+        <input type="file" id="bgInput" accept=".png,.jpg,.jpeg" hidden />
+      </div>
+      <div id="bgList" class="bg-list"></div>
+    </section>
+
+    <section class="sidebar-section">
+      <h4>Canvas Size</h4>
+      <div class="form-row">
+        <label>Width <input type="number" id="canvasW" value="1200" min="400" max="4000" /></label>
+        <label>Height <input type="number" id="canvasH" value="850" min="300" max="3000" /></label>
+      </div>
+      <button class="btn btn-outline btn-sm" id="applySize">Apply</button>
+    </section>
+
+    <section class="sidebar-section">
+      <h4>Text Fields</h4>
+      <div id="fieldList" class="field-list"></div>
+      <button class="btn btn-outline btn-sm" id="addFieldBtn">+ Add Text Field</button>
+    </section>
+
+    <section class="sidebar-section" id="fieldEditor" style="display:none">
+      <h4>Edit Selected Field</h4>
+      <label>Variable
+        <select id="fVariable">
+          <option value="{{Name}}">Name</option>
+          <option value="{{Email}}">Email</option>
+          <option value="{{Course/Event}}">Course/Event</option>
+          <option value="{{Date}}">Date</option>
+          <option value="Custom">Custom text…</option>
+        </select>
+      </label>
+      <label id="customTextRow" style="display:none">Custom Text
+        <input type="text" id="fCustomText" placeholder="Static text" />
+      </label>
+      <label>Font
+        <select id="fFont">
+          {% for fname, fdisplay in fonts %}
+          <option value="{{ fname }}">{{ fdisplay }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <div class="form-row">
+        <label>Size <input type="number" id="fSize" value="48" min="8" max="200" /></label>
+        <label>Color <input type="color" id="fColor" value="#1a1a2e" /></label>
+      </div>
+      <label>Align
+        <select id="fAlign">
+          <option value="center">Center</option>
+          <option value="left">Left</option>
+          <option value="right">Right</option>
+        </select>
+      </label>
+      <button class="btn btn-danger btn-sm" id="deleteFieldBtn">Delete Field</button>
+    </section>
+
+    <section class="sidebar-section">
+      <h4>Template Name</h4>
+      <input type="text" id="templateName" placeholder="e.g. Workshop Certificate 2026" />
+    </section>
+
+    <div class="sidebar-actions">
+      <button class="btn btn-primary" id="saveTemplateBtn">Save &amp; Continue →</button>
+    </div>
+  </aside>
+
+  <!-- Canvas area -->
+  <div class="canvas-container">
+    <div class="canvas-hint">Drag text fields to reposition them on the certificate</div>
+    <canvas id="certCanvas" width="1200" height="850"></canvas>
+  </div>
+</div>
+
+<input type="hidden" id="sessionId" value="{{ session_id }}" />
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const FONTS = {{ fonts | tojson }};
+</script>
+<script src="/static/js/designer.js"></script>
+{% endblock %}

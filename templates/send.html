@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% set active_step = 'send' %}
+{% set active_step_index = 3 %}
+{% block title %}Send Emails – Auto-Certification{% endblock %}
+
+{% block content %}
+<div class="page-card">
+  <h2>Step 4: Send Certificates</h2>
+  <p class="text-muted">Configure your email settings below.</p>
+
+  <div id="sendError" class="alert alert-error" style="display:none"></div>
+
+  <form id="smtpForm">
+    <div class="tab-group">
+      <label class="tab-option">
+        <input type="radio" name="smtpMode" value="gmail" checked /> Gmail
+      </label>
+      <label class="tab-option">
+        <input type="radio" name="smtpMode" value="custom" /> Custom SMTP
+      </label>
+    </div>
+
+    <!-- Gmail mode -->
+    <div id="gmailFields">
+      <div class="form-group">
+        <label>Gmail Address</label>
+        <input type="email" id="gmailAddress" placeholder="you@gmail.com" />
+      </div>
+      <div class="form-group">
+        <label>App Password
+          <span class="help-tip" title="Generate at: Google Account → Security → 2-Step Verification → App Passwords">?</span>
+        </label>
+        <input type="password" id="gmailAppPass" placeholder="xxxx xxxx xxxx xxxx" />
+      </div>
+    </div>
+
+    <!-- Custom SMTP -->
+    <div id="customFields" style="display:none">
+      <div class="form-row">
+        <div class="form-group">
+          <label>SMTP Host</label>
+          <input type="text" id="smtpHost" placeholder="smtp.example.com" />
+        </div>
+        <div class="form-group">
+          <label>Port</label>
+          <input type="number" id="smtpPort" value="587" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="smtpUser" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="smtpPass" />
+        </div>
+      </div>
+      <label class="checkbox-label">
+        <input type="checkbox" id="useTls" checked /> Use TLS/STARTTLS
+      </label>
+    </div>
+
+    <div class="form-group">
+      <label>Sender Name</label>
+      <input type="text" id="senderName" placeholder="Event Organizer" />
+    </div>
+    <div class="form-group">
+      <label>Email Subject</label>
+      <input type="text" id="emailSubject" value="Your Certificate for {{Course/Event}}" />
+      <small>Use <code>{{Name}}</code>, <code>{{Course/Event}}</code>, <code>{{Date}}</code> as placeholders.</small>
+    </div>
+    <div class="form-group">
+      <label>Email Body</label>
+      <textarea id="emailBody" rows="5">Dear {{Name}},
+
+Congratulations! Please find your certificate for "{{Course/Event}}" attached.
+
+Best regards,
+The Event Team</textarea>
+    </div>
+
+    <div class="action-row">
+      <a id="backBtn" href="#" class="btn btn-outline">← Back to Preview</a>
+      <button type="submit" class="btn btn-primary" id="sendBtn">Send All Certificates 🚀</button>
+    </div>
+  </form>
+
+  <!-- Progress section -->
+  <div id="progressSection" style="display:none">
+    <h3>Sending Progress</h3>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div id="progressSummary" class="progress-summary"></div>
+    <div id="statusList" class="status-list"></div>
+    <div id="doneMessage" class="alert alert-success" style="display:none"></div>
+  </div>
+</div>
+
+<input type="hidden" id="sessionId" value="{{ session_id }}" />
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/send.js"></script>
+{% endblock %}
