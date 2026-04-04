@@ -19,10 +19,12 @@ def _client():
     global _s3_client
     if _s3_client is None:
         import boto3
+        from botocore.config import Config
         kwargs = dict(
             aws_access_key_id=config.AWS_ACCESS_KEY_ID,
             aws_secret_access_key=config.AWS_SECRET_ACCESS_KEY,
             region_name=config.AWS_REGION,
+            config=Config(signature_version='s3v4'),
         )
         if config.STORAGE_ENDPOINT_URL:
             # Cloudflare R2 (or any S3-compatible provider)
