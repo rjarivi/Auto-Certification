@@ -3,8 +3,13 @@ import config
 
 
 def get_conn():
-    """Open and return a new psycopg2 connection."""
-    return psycopg2.connect(config.DATABASE_URL)
+    """Open and return a new psycopg2 connection. Adds sslmode=require for Neon."""
+    url = config.DATABASE_URL
+    # Neon (and many hosted Postgres providers) require SSL
+    if url and 'sslmode' not in url:
+        sep = '&' if '?' in url else '?'
+        url = url + sep + 'sslmode=require'
+    return psycopg2.connect(url)
 
 
 def db_init():

@@ -1,35 +1,185 @@
-{% extends "base.html" %}
-{% set show_steps = false %}
-{% block title %}Auto-Certification – Home{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CertifyAuto — Send Personalized Certificates Automatically</title>
+  <meta name="description" content="Upload a spreadsheet, design a certificate template, and email personalized certificates to hundreds of recipients in minutes." />
+  <link rel="stylesheet" href="/static/css/main.css" />
+</head>
+<body>
 
-{% block content %}
-<div class="hero">
-  <div class="hero-icon">🎓</div>
-  <h1>Auto-Certification</h1>
-  <p class="hero-sub">Upload an Excel file, design a beautiful certificate, and email everyone automatically.</p>
-  <a href="/upload" class="btn btn-primary btn-lg">Get Started</a>
+<!-- ── Navigation ──────────────────────────────────────────────────────────── -->
+<nav class="land-nav">
+  <a href="/" class="logo">
+    <span class="logo-icon">🎓</span>
+    <span>CertifyAuto</span>
+  </a>
+  <div class="land-nav-links">
+    <a href="#how-it-works">How it works</a>
+    <a href="#features">Features</a>
+    <a href="#use-cases">Use cases</a>
+  </div>
+  <div class="land-nav-right">
+    <a href="/upload" class="btn btn-primary btn-sm">Get Started Free</a>
+  </div>
+</nav>
+
+<!-- ── Hero ────────────────────────────────────────────────────────────────── -->
+<section class="hero-section">
+  <div class="hero-content">
+    <div class="hero-badge">✦ Certificate Automation</div>
+    <h1>Send personalized certificates to <em>everyone at once</em></h1>
+    <p class="hero-sub">Upload a spreadsheet, design a beautiful template, preview every certificate, and email them all automatically — in minutes, not hours.</p>
+    <div class="hero-ctas">
+      <a href="/upload" class="btn btn-primary btn-lg">Upload your Excel file →</a>
+      <a href="#how-it-works" class="btn btn-ghost btn-lg">See how it works</a>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="cert-mockup">
+      <div class="cert-inner">
+        <div class="cert-ornament">✦ ✦ ✦</div>
+        <div class="cert-label">Certificate of Completion</div>
+        <div class="cert-awarded">This is to certify that</div>
+        <div class="cert-name">Sarah Johnson</div>
+        <div class="cert-course">Advanced Python Development</div>
+        <div class="cert-divider"></div>
+        <div class="cert-footer">
+          <span class="cert-date">April 4, 2026</span>
+          <span>With Distinction</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Stats ───────────────────────────────────────────────────────────────── -->
+<div class="stats-bar">
+  <div class="stat"><span class="stat-num">4</span><span class="stat-label">Steps to send</span></div>
+  <div class="stat"><span class="stat-num">∞</span><span class="stat-label">Recipients per batch</span></div>
+  <div class="stat"><span class="stat-num">3</span><span class="stat-label">Email providers</span></div>
+  <div class="stat"><span class="stat-num">$0</span><span class="stat-label">Cost to start</span></div>
 </div>
 
-<div class="features">
-  <div class="feature-card">
-    <div class="feature-icon">📊</div>
-    <h3>Upload Excel</h3>
-    <p>Provide a spreadsheet with Name, Email, Course/Event, and Date columns.</p>
+<!-- ── How it works ────────────────────────────────────────────────────────── -->
+<section class="section" id="how-it-works">
+  <div class="section-tag">Process</div>
+  <h2 class="section-title">From spreadsheet to inbox in 4 steps</h2>
+  <p class="section-sub">No coding, no complex setup. Just upload, design, preview, and send.</p>
+
+  <div class="hiw-steps">
+    <div class="hiw-step">
+      <div class="hiw-num">1</div>
+      <div class="hiw-icon">📊</div>
+      <h3>Upload your Excel</h3>
+      <p>Provide a spreadsheet with Name, Email, Course/Event, and Date columns. Download our sample to get started instantly.</p>
+    </div>
+    <div class="hiw-step">
+      <div class="hiw-num">2</div>
+      <div class="hiw-icon">🎨</div>
+      <h3>Design your template</h3>
+      <p>Upload a background image and drag text fields to position them visually on an interactive canvas.</p>
+    </div>
+    <div class="hiw-step">
+      <div class="hiw-num">3</div>
+      <div class="hiw-icon">👁️</div>
+      <h3>Preview every certificate</h3>
+      <p>See exactly how each person's certificate will look before a single email is sent. Navigate through all recipients.</p>
+    </div>
+    <div class="hiw-step">
+      <div class="hiw-num">4</div>
+      <div class="hiw-icon">🚀</div>
+      <h3>Send to everyone</h3>
+      <p>Enter your Gmail, custom SMTP, or AWS SES credentials. Watch a live progress stream as each certificate is delivered.</p>
+    </div>
   </div>
-  <div class="feature-card">
-    <div class="feature-icon">🎨</div>
-    <h3>Design Template</h3>
-    <p>Upload a background image and drag text fields to position them visually.</p>
-  </div>
-  <div class="feature-card">
-    <div class="feature-icon">👁️</div>
-    <h3>Preview</h3>
-    <p>See how each certificate will look before sending.</p>
-  </div>
-  <div class="feature-card">
-    <div class="feature-icon">📧</div>
-    <h3>Send Emails</h3>
-    <p>Enter your SMTP or Gmail credentials and send personalized certificates in one click.</p>
+</section>
+
+<!-- ── Features ────────────────────────────────────────────────────────────── -->
+<div class="section-alt">
+  <div class="section-inner" id="features">
+    <div class="section-tag">Features</div>
+    <h2 class="section-title">Everything you need, nothing you don't</h2>
+    <p class="section-sub">Built for people who run events, courses, and workshops — not for enterprise IT teams.</p>
+
+    <div class="features-grid">
+      <div class="feature-tile">
+        <div class="feature-tile-icon">🖼️</div>
+        <h3>Visual certificate designer</h3>
+        <p>Drag text fields to exactly the right position on your background. Choose fonts, sizes, colors, and alignment per field.</p>
+      </div>
+      <div class="feature-tile">
+        <div class="feature-tile-icon">📋</div>
+        <h3>Excel / CSV support</h3>
+        <p>Works with any spreadsheet. Required columns: Name, Email, Course/Event, Date. Download our sample to see the format.</p>
+      </div>
+      <div class="feature-tile">
+        <div class="feature-tile-icon">📧</div>
+        <h3>3 email providers</h3>
+        <p>Send via Gmail (App Password), any custom SMTP server, or AWS SES for high-volume sending at minimal cost.</p>
+      </div>
+      <div class="feature-tile">
+        <div class="feature-tile-icon">⚡</div>
+        <h3>Real-time progress</h3>
+        <p>Watch a live stream as each certificate is generated and delivered. Per-recipient success/failure status shown instantly.</p>
+      </div>
+      <div class="feature-tile">
+        <div class="feature-tile-icon">🔒</div>
+        <h3>Your credentials, your control</h3>
+        <p>Email credentials are never stored on the server — they're used only during the send session and discarded immediately.</p>
+      </div>
+      <div class="feature-tile">
+        <div class="feature-tile-icon">☁️</div>
+        <h3>Cloud-ready architecture</h3>
+        <p>Deployable on Railway in minutes. Uses PostgreSQL and Cloudflare R2 for reliable, scalable storage at near-zero cost.</p>
+      </div>
+    </div>
   </div>
 </div>
-{% endblock %}
+
+<!-- ── Use cases ────────────────────────────────────────────────────────────── -->
+<section class="section" id="use-cases">
+  <div class="section-tag">Use cases</div>
+  <h2 class="section-title">Built for any achievement worth recognizing</h2>
+  <div class="use-cases">
+    <span class="use-case-chip">🎓 Online courses</span>
+    <span class="use-case-chip">🏆 Hackathons</span>
+    <span class="use-case-chip">🏢 Corporate training</span>
+    <span class="use-case-chip">🎤 Conferences &amp; workshops</span>
+    <span class="use-case-chip">🧑‍💻 Bootcamps</span>
+    <span class="use-case-chip">📚 School programs</span>
+    <span class="use-case-chip">🤝 Volunteer recognition</span>
+    <span class="use-case-chip">🏅 Sports tournaments</span>
+    <span class="use-case-chip">🎨 Art competitions</span>
+    <span class="use-case-chip">🔬 Research programs</span>
+  </div>
+</section>
+
+<!-- ── CTA ──────────────────────────────────────────────────────────────────── -->
+<div class="cta-section">
+  <h2>Start sending in minutes</h2>
+  <p>No account required. Just upload your Excel file and go.</p>
+  <div class="cta-actions">
+    <a href="/upload" class="btn btn-primary btn-lg">Upload your Excel file →</a>
+    <a href="/static/sample_data.xlsx" download class="btn btn-outline btn-lg">⬇ Download sample Excel</a>
+  </div>
+</div>
+
+<!-- ── Footer ───────────────────────────────────────────────────────────────── -->
+<footer class="land-footer">
+  <div class="logo">
+    <span class="logo-icon">🎓</span>
+    <span>CertifyAuto</span>
+  </div>
+  <span>Generate &amp; send beautiful certificates in minutes.</span>
+  <div style="display:flex;gap:1.5rem">
+    <a href="/upload">Get Started</a>
+    <a href="/static/sample_data.xlsx" download>Sample Excel</a>
+    <a href="#how-it-works">How it works</a>
+  </div>
+</footer>
+
+</body>
+</html>

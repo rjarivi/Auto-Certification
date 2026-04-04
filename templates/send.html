@@ -1,16 +1,17 @@
 {% extends "base.html" %}
 {% set active_step = 'send' %}
 {% set active_step_index = 3 %}
-{% block title %}Send Emails – Auto-Certification{% endblock %}
+{% block title %}Send Certificates — CertifyAuto{% endblock %}
 
 {% block content %}
 <div class="page-card">
-  <h2>Step 4: Send Certificates</h2>
-  <p class="text-muted">Configure your email settings below.</p>
+  <h2>Send certificates</h2>
+  <p class="text-muted">Configure your email provider below. Credentials are never stored on the server.</p>
 
   <div id="sendError" class="alert alert-error" style="display:none"></div>
 
   <form id="smtpForm">
+
     <div class="tab-group">
       <label class="tab-option">
         <input type="radio" name="smtpMode" value="gmail" checked /> Gmail
@@ -25,25 +26,21 @@
       {% endif %}
     </div>
 
-    <!-- AWS SES mode -->
-    <div id="sesFields" style="display:none">
-      <div class="alert alert-success" style="margin-bottom:1rem">
-        AWS SES is configured on the server. Your verified sender email will be used automatically —
-        no credentials required here.
-      </div>
-    </div>
-
-    <!-- Gmail mode -->
+    <!-- Gmail -->
     <div id="gmailFields">
-      <div class="form-group">
-        <label>Gmail Address</label>
-        <input type="email" id="gmailAddress" placeholder="you@gmail.com" />
+      <div class="alert alert-info" style="margin-bottom:1.25rem">
+        Gmail requires an <strong>App Password</strong> — not your regular password.
+        Generate one at: <strong>Google Account → Security → 2-Step Verification → App Passwords</strong>
       </div>
-      <div class="form-group">
-        <label>App Password
-          <span class="help-tip" title="Generate at: Google Account → Security → 2-Step Verification → App Passwords">?</span>
-        </label>
-        <input type="password" id="gmailAppPass" placeholder="xxxx xxxx xxxx xxxx" />
+      <div class="form-row">
+        <div class="form-group">
+          <label>Gmail Address</label>
+          <input type="email" id="gmailAddress" placeholder="you@gmail.com" />
+        </div>
+        <div class="form-group">
+          <label>App Password</label>
+          <input type="password" id="gmailAppPass" placeholder="xxxx xxxx xxxx xxxx" />
+        </div>
       </div>
     </div>
 
@@ -69,19 +66,27 @@
           <input type="password" id="smtpPass" />
         </div>
       </div>
-      <label class="checkbox-label">
-        <input type="checkbox" id="useTls" checked /> Use TLS/STARTTLS
+      <label class="checkbox-label" style="margin-bottom:1rem">
+        <input type="checkbox" id="useTls" checked /> Use TLS / STARTTLS
       </label>
     </div>
 
+    <!-- AWS SES -->
+    <div id="sesFields" style="display:none">
+      <div class="alert alert-success">
+        AWS SES is configured on the server. Your verified sender address will be used automatically — no credentials needed here.
+      </div>
+    </div>
+
+    <!-- Common fields -->
     <div class="form-group">
       <label>Sender Name</label>
-      <input type="text" id="senderName" placeholder="Event Organizer" />
+      <input type="text" id="senderName" placeholder="e.g. Event Organizer" />
     </div>
     <div class="form-group">
       <label>Email Subject</label>
       <input type="text" id="emailSubject" value="Your Certificate for {{Course/Event}}" />
-      <small>Use <code>{{Name}}</code>, <code>{{Course/Event}}</code>, <code>{{Date}}</code> as placeholders.</small>
+      <small>Supports <code>{{Name}}</code>, <code>{{Course/Event}}</code>, <code>{{Date}}</code></small>
     </div>
     <div class="form-group">
       <label>Email Body</label>
@@ -90,24 +95,24 @@
 Congratulations! Please find your certificate for "{{Course/Event}}" attached.
 
 Best regards,
-The Event Team</textarea>
+The Organizing Team</textarea>
     </div>
 
     <div class="action-row">
-      <a id="backBtn" href="#" class="btn btn-outline">← Back to Preview</a>
-      <button type="submit" class="btn btn-primary" id="sendBtn">Send All Certificates 🚀</button>
+      <a id="backBtn" href="#" class="btn btn-ghost">← Back to Preview</a>
+      <button type="submit" class="btn btn-primary btn-lg" id="sendBtn">Send All Certificates →</button>
     </div>
   </form>
 
-  <!-- Progress section -->
+  <!-- Progress -->
   <div id="progressSection" style="display:none">
-    <h3>Sending Progress</h3>
+    <h3 style="margin-bottom:1rem;font-size:1rem;color:var(--text-2)">Sending progress</h3>
     <div class="progress-bar-wrap">
       <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
     </div>
-    <div id="progressSummary" class="progress-summary"></div>
+    <p id="progressSummary" class="progress-summary"></p>
     <div id="statusList" class="status-list"></div>
-    <div id="doneMessage" class="alert alert-success" style="display:none"></div>
+    <div id="doneMessage" class="alert alert-success" style="display:none;margin-top:1rem"></div>
   </div>
 </div>
 

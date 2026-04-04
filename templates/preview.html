@@ -1,19 +1,19 @@
 {% extends "base.html" %}
 {% set active_step = 'preview' %}
 {% set active_step_index = 2 %}
-{% block title %}Preview – Auto-Certification{% endblock %}
+{% block title %}Preview Certificates — CertifyAuto{% endblock %}
 
 {% block content %}
 <div class="page-card">
-  <h2>Step 3: Preview Certificates</h2>
-  <p class="text-muted">Review how each certificate looks before sending.</p>
+  <h2>Preview certificates</h2>
+  <p class="text-muted">Review each certificate before sending. Navigate through all recipients.</p>
 
   <div id="previewError" class="alert alert-error" style="display:none"></div>
 
   <div class="preview-nav">
-    <button class="btn btn-outline" id="prevBtn" disabled>← Previous</button>
-    <span id="previewCounter" class="preview-counter">– / –</span>
-    <button class="btn btn-outline" id="nextBtn" disabled>Next →</button>
+    <button class="btn btn-outline btn-sm" id="prevBtn" disabled>← Prev</button>
+    <span id="previewCounter" class="preview-counter">— / —</span>
+    <button class="btn btn-outline btn-sm" id="nextBtn" disabled>Next →</button>
   </div>
 
   <div class="preview-name" id="previewName"></div>
@@ -23,9 +23,9 @@
     <img id="previewImg" src="" alt="Certificate preview" style="display:none" />
   </div>
 
-  <div class="action-row">
-    <a id="backBtn" href="#" class="btn btn-outline">← Back to Designer</a>
-    <button id="proceedBtn" class="btn btn-primary" disabled>Proceed to Send →</button>
+  <div class="action-row" style="margin-top:1.5rem">
+    <a id="backBtn" href="#" class="btn btn-ghost">← Back to Designer</a>
+    <button id="proceedBtn" class="btn btn-primary" disabled>Continue to Send →</button>
   </div>
 </div>
 

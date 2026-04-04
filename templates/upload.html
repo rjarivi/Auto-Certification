@@ -1,19 +1,19 @@
 {% extends "base.html" %}
 {% set active_step = 'upload' %}
 {% set active_step_index = 0 %}
-{% block title %}Upload Excel – Auto-Certification{% endblock %}
+{% block title %}Upload Excel — CertifyAuto{% endblock %}
 
 {% block content %}
 <div class="page-card">
-  <h2>Step 1: Upload Your Excel File</h2>
-  <p class="text-muted">Your spreadsheet must include these columns: <strong>Name, Email, Course/Event, Date</strong></p>
+  <h2>Upload your Excel file</h2>
+  <p class="text-muted">Your spreadsheet must include these columns: <strong style="color:var(--text)">Name, Email, Course/Event, Date</strong></p>
 
   <div class="upload-zone" id="dropZone">
     <div class="upload-icon">📂</div>
     <p>Drag &amp; drop your <strong>.xlsx</strong> file here, or</p>
-    <label class="btn btn-outline" for="fileInput">Browse File</label>
+    <label class="btn btn-outline btn-sm" for="fileInput" style="cursor:pointer">Browse file</label>
     <input type="file" id="fileInput" accept=".xlsx,.xls" hidden />
-    <p class="text-small text-muted">Max size: 16 MB</p>
+    <p class="text-small text-muted" style="margin-top:0.5rem">Max size: 16 MB &nbsp;·&nbsp; .xlsx / .xls only</p>
   </div>
 
   <div id="errors" class="alert alert-error" style="display:none"></div>
@@ -32,13 +32,16 @@
         <tbody id="tableBody"></tbody>
       </table>
     </div>
+    <p class="text-small text-muted" style="margin-top:-0.5rem;margin-bottom:1rem">Showing up to 10 rows preview.</p>
     <div class="action-row">
-      <button id="proceedBtn" class="btn btn-primary">Continue to Designer →</button>
+      <span></span>
+      <button id="proceedBtn" class="btn btn-primary" disabled>Continue to Designer →</button>
     </div>
   </div>
 
   <div class="sample-download">
-    <a href="/static/sample_data.xlsx" download class="btn btn-outline btn-sm">⬇ Download Sample Excel</a>
+    <p class="text-small text-muted" style="margin-bottom:0.65rem">Need a template? Download our sample file.</p>
+    <a href="/static/sample_data.xlsx" download class="btn btn-outline btn-sm">⬇ Download sample Excel</a>
   </div>
 </div>
 {% endblock %}

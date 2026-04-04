@@ -10,16 +10,19 @@
   <header class="app-header">
     <a href="/" class="logo">
       <span class="logo-icon">🎓</span>
-      <span>Auto-Certification</span>
+      <span>CertifyAuto</span>
     </a>
+    <a href="/upload" class="btn btn-outline btn-sm">+ New Batch</a>
   </header>
 
   {% if show_steps is not defined or show_steps %}
   <nav class="steps-nav">
-    {% set steps = [('upload', 'Upload Excel', '/upload'), ('designer', 'Design Template', '/designer'), ('preview', 'Preview', '/preview'), ('send', 'Send Emails', '/send')] %}
-    {% for key, label, href in steps %}
+    {% set steps = [('upload', 'Upload Excel', 1), ('designer', 'Design', 2), ('preview', 'Preview', 3), ('send', 'Send', 4)] %}
+    {% for key, label, num in steps %}
     <div class="step {% if active_step == key %}active{% elif active_step_index is defined and loop.index0 < active_step_index %}done{% endif %}">
-      <div class="step-circle">{{ loop.index }}</div>
+      <div class="step-circle">
+        {% if active_step_index is defined and loop.index0 < active_step_index %}✓{% else %}{{ num }}{% endif %}
+      </div>
       <span class="step-label">{{ label }}</span>
     </div>
     {% if not loop.last %}<div class="step-connector"></div>{% endif %}
@@ -32,7 +35,7 @@
   </main>
 
   <footer class="app-footer">
-    <p>Auto-Certification &mdash; Generate &amp; send certificates in minutes.</p>
+    <span>CertifyAuto &mdash; Generate &amp; send beautiful certificates in minutes.</span>
   </footer>
 
   {% block scripts %}{% endblock %}
