@@ -13,6 +13,7 @@ from core.email_sender import send_all_sse
 from core.template_manager import (save_template, load_template, list_templates,
                                     create_session, load_session, update_session)
 from core import storage
+from core.font_manager import list_fonts, download_google_font, register_uploaded_font
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-change-in-prod')
@@ -80,7 +81,7 @@ def designer_page():
     except Exception as e:
         import traceback
         return f'<pre>Designer error:\n{traceback.format_exc()}</pre>', 500
-    fonts = list(config.BUNDLED_FONTS.items())
+    fonts = list_fonts()
     return render_template('designer.html', session_id=session_id, session=session,
                            fonts=fonts, templates=templates)
 
@@ -180,6 +181,48 @@ def api_upload_background():
     s3_key   = f'backgrounds/{filename}'
     url      = storage.upload_bytes(f.read(), s3_key, content_type=f.content_type or 'image/png')
     return jsonify({'filename': filename, 'url': url})
+
+
+@app.route('/api/fonts')
+def api_fonts():
+    return jsonify(list_fonts())
+
+
+@app.route('/api/add-google-font', methods=['POST'])
+def api_add_google_font():
+    data = request.get_json() or {}
+    family_input = data.get('family', '').strip()
+    if not family_input:
+        return jsonify({'error': 'Font family name or URL required'}), 400
+    try:
+        font_id, display_name, filename = download_google_font(family_input)
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'error': f'Unexpected error: {e}'}), 500
+    return jsonify({'font_id': font_id, 'display_name': display_name, 'filename': filename})
+
+
+@app.route('/api/upload-font', methods=['POST'])
+def api_upload_font():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file'}), 400
+    f = request.files['file']
+    if not f.filename:
+        return jsonify({'error': 'No filename'}), 400
+    ext = f.filename.rsplit('.', 1)[-1].lower() if '.' in f.filename else ''
+    if ext not in {'ttf', 'otf', 'woff', 'woff2'}:
+        return jsonify({'error': 'Only TTF, OTF, WOFF, or WOFF2 files allowed'}), 400
+    filename  = secure_filename(f.filename)
+    dest_path = os.path.join(config.FONT_FOLDER, filename)
+    os.makedirs(config.FONT_FOLDER, exist_ok=True)
+    f.save(dest_path)
+    display_name = request.form.get('display_name', '').strip()
+    try:
+        font_id, display_name = register_uploaded_font(filename, display_name)
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    return jsonify({'font_id': font_id, 'display_name': display_name, 'filename': filename})
 
 
 @app.route('/api/health')

@@ -338,6 +338,7 @@ tr:hover td { background: var(--surface-2); }
 .bg-thumb:hover  { border-color: var(--border-hi); }
 .bg-thumb.selected { border-color: var(--accent); }
 .bg-upload-row { margin-bottom: 0.5rem; }
+.font-add-row { display: flex; gap: 0.45rem; margin-bottom: 0.5rem; }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    PREVIEW

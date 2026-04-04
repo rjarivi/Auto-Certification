@@ -29,6 +29,24 @@
     </section>
 
     <section class="sidebar-section">
+      <h4>Add Fonts</h4>
+      <div class="font-add-row">
+        <input type="text" id="googleFontInput"
+               placeholder="e.g. Playfair Display" style="flex:1" />
+        <button class="btn btn-outline btn-sm" id="addGoogleFontBtn">Add</button>
+      </div>
+      <p class="text-small text-muted" style="margin:0.4rem 0 0.6rem">
+        Type any <a href="https://fonts.google.com" target="_blank" style="color:var(--accent)">Google Fonts</a>
+        family name above, or upload a local TTF / OTF file:
+      </p>
+      <label class="btn btn-outline btn-sm" for="fontFileInput" style="cursor:pointer;width:100%;justify-content:center">
+        Upload font file (.ttf / .otf)
+      </label>
+      <input type="file" id="fontFileInput" accept=".ttf,.otf,.woff,.woff2" hidden />
+      <div id="fontStatus" style="font-size:0.8rem;margin-top:0.5rem;display:none"></div>
+    </section>
+
+    <section class="sidebar-section">
       <h4>Text Fields</h4>
       <div id="fieldList" class="field-list"></div>
       <button class="btn btn-outline btn-sm" id="addFieldBtn" style="width:100%">+ Add Text Field</button>
@@ -53,8 +71,8 @@
       <div class="form-group">
         <label>Font</label>
         <select id="fFont">
-          {% for fname, fdisplay in fonts %}
-          <option value="{{ fname }}">{{ fdisplay }}</option>
+          {% for f in fonts %}
+          <option value="{{ f.id }}">{{ f.display_name }}</option>
           {% endfor %}
         </select>
       </div>
@@ -94,6 +112,10 @@
 {% endblock %}
 
 {% block scripts %}
-<script>const FONTS = {{ fonts | tojson }};</script>
+<script>const FONTS = {{ fonts | tojson }};
+/* FONT_CSS_MAP: font-id → {css_family, bold, source, filename} */
+const FONT_CSS_MAP = {};
+FONTS.forEach(f => { FONT_CSS_MAP[f.id] = f; });
+</script>
 <script src="/static/js/designer.js"></script>
 {% endblock %}
