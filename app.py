@@ -152,6 +152,33 @@ def api_upload_background():
     return jsonify({'filename': filename, 'url': url})
 
 
+@app.route('/api/health')
+def api_health():
+    """Diagnostic endpoint — tests storage and DB connections."""
+    result = {
+        'USE_S3': config.USE_S3,
+        'USE_DB': config.USE_DB,
+        'storage_endpoint': config.STORAGE_ENDPOINT_URL or 'AWS S3',
+        'bucket': config.S3_BUCKET_NAME,
+    }
+    if config.USE_S3:
+        try:
+            storage.list_files('backgrounds/')
+            result['storage'] = 'OK'
+        except Exception as e:
+            result['storage'] = f'ERROR: {str(e)}'
+    if config.USE_DB:
+        try:
+            from core.db import get_conn
+            with get_conn() as conn:
+                with conn.cursor() as cur:
+                    cur.execute('SELECT 1')
+            result['database'] = 'OK'
+        except Exception as e:
+            result['database'] = f'ERROR: {str(e)}'
+    return jsonify(result)
+
+
 @app.route('/api/save-template', methods=['POST'])
 def api_save_template():
     data = request.get_json()

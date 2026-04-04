@@ -59,10 +59,10 @@ def upload_file(local_path: str, s3_key: str) -> str:
         import shutil
         shutil.copy2(local_path, dest)
         return get_url(s3_key)
-    extra = _extra_args()
-    _client().upload_file(local_path, config.S3_BUCKET_NAME, s3_key,
-                          ExtraArgs=extra if extra else None)
-    return get_url(s3_key)
+    # Use put_object (not upload_file/transfer manager) for R2 compatibility
+    with open(local_path, 'rb') as f:
+        data = f.read()
+    return upload_bytes(data, s3_key, content_type='application/octet-stream')
 
 
 def upload_bytes(data: bytes, s3_key: str, content_type: str = 'application/octet-stream') -> str:
