@@ -33,7 +33,13 @@
     fd.append('file', file);
 
     fetch('/api/upload-excel', { method: 'POST', body: fd })
-      .then(r => r.json())
+      .then(r => {
+        const ct = r.headers.get('content-type') || '';
+        if (!ct.includes('application/json')) {
+          throw new Error(`Server error (HTTP ${r.status}) — check Railway logs for details.`);
+        }
+        return r.json();
+      })
       .then(data => {
         loader.style.display = 'none';
 

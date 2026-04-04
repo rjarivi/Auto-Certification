@@ -91,26 +91,32 @@ def api_upload_excel():
 
     filename = secure_filename(f.filename)
 
-    if config.USE_S3:
-        # Save to a temp file for parsing, then upload to S3
-        with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as tmp:
-            f.save(tmp.name)
-            tmp_path = tmp.name
-        result = parse_excel(tmp_path)
-        s3_key = f'uploads/{uuid.uuid4()}_{filename}'
-        storage.upload_file(tmp_path, s3_key)
-        os.unlink(tmp_path)
-        excel_key = s3_key
-    else:
-        filepath = os.path.join(config.UPLOAD_FOLDER, f'{uuid.uuid4()}_{filename}')
-        f.save(filepath)
-        result = parse_excel(filepath)
-        excel_key = filepath
+    try:
+        if config.USE_S3:
+            with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as tmp:
+                f.save(tmp.name)
+                tmp_path = tmp.name
+            result   = parse_excel(tmp_path)
+            s3_key   = f'uploads/{uuid.uuid4()}_{filename}'
+            storage.upload_file(tmp_path, s3_key)
+            os.unlink(tmp_path)
+            excel_key = s3_key
+        else:
+            filepath  = os.path.join(config.UPLOAD_FOLDER, f'{uuid.uuid4()}_{filename}')
+            f.save(filepath)
+            result    = parse_excel(filepath)
+            excel_key = filepath
+    except Exception as e:
+        return jsonify({'error': f'Server error during upload: {str(e)}'}), 500
 
     if not result['rows'] and result['errors']:
         return jsonify({'errors': result['errors']}), 422
 
-    session_id = create_session(excel_key, result['rows'])
+    try:
+        session_id = create_session(excel_key, result['rows'])
+    except Exception as e:
+        return jsonify({'error': f'Failed to create session: {str(e)}'}), 500
+
     return jsonify({
         'session_id':   session_id,
         'row_count':    len(result['rows']),
