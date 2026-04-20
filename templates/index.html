@@ -70,30 +70,70 @@
   <h2 class="section-title">From spreadsheet to inbox in 4 steps</h2>
   <p class="section-sub">No coding, no complex setup. Just upload, design, preview, and send.</p>
 
-  <div class="hiw-steps">
-    <div class="hiw-step">
-      <div class="hiw-num">1</div>
-      <div class="hiw-icon">📊</div>
-      <h3>Upload your Excel</h3>
-      <p>Provide a spreadsheet with Name, Email, Course/Event, and Date columns. Download our sample to get started instantly.</p>
+  <div class="hiw-slideshow">
+    <div class="hiw-tabs">
+      <button class="hiw-tab active" data-slide="1">
+        <span class="hiw-num">1</span> Upload Data
+      </button>
+      <button class="hiw-tab" data-slide="2">
+        <span class="hiw-num">2</span> Design
+      </button>
+      <button class="hiw-tab" data-slide="3">
+        <span class="hiw-num">3</span> Preview
+      </button>
+      <button class="hiw-tab" data-slide="4">
+        <span class="hiw-num">4</span> Send
+      </button>
     </div>
-    <div class="hiw-step">
-      <div class="hiw-num">2</div>
-      <div class="hiw-icon">🎨</div>
-      <h3>Design your template</h3>
-      <p>Upload a background image and drag text fields to position them visually on an interactive canvas.</p>
-    </div>
-    <div class="hiw-step">
-      <div class="hiw-num">3</div>
-      <div class="hiw-icon">👁️</div>
-      <h3>Preview every certificate</h3>
-      <p>See exactly how each person's certificate will look before a single email is sent. Navigate through all recipients.</p>
-    </div>
-    <div class="hiw-step">
-      <div class="hiw-num">4</div>
-      <div class="hiw-icon">🚀</div>
-      <h3>Send to everyone</h3>
-      <p>Enter your Gmail, custom SMTP, or AWS SES credentials. Watch a live progress stream as each certificate is delivered.</p>
+    <div class="hiw-panels">
+      <div class="hiw-panel active" id="panel-1">
+        <div class="hiw-panel-text">
+          <h3>Provide your spreadsheet</h3>
+          <p>Upload any Excel or CSV file. We map your columns automatically to create personalized certificates for hundreds of people in seconds.</p>
+        </div>
+        <div class="hiw-panel-anim anim-upload">
+          <div class="mock-window">
+            <div class="mock-header"><span></span><span></span><span></span></div>
+            <div class="mock-body"><div class="mock-dropzone">Drop .xlsx here</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="hiw-panel" id="panel-2">
+        <div class="hiw-panel-text">
+          <h3>Design visually</h3>
+          <p>Drag and drop text variables right onto your custom certificate background. Change fonts, colors, and styles visually.</p>
+        </div>
+        <div class="hiw-panel-anim anim-design">
+           <div class="mock-window">
+            <div class="mock-header"><span></span><span></span><span></span></div>
+            <div class="mock-body mock-flex"><div class="mock-tool"></div><div class="mock-canvas"><div class="mock-box">John Doe</div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="hiw-panel" id="panel-3">
+        <div class="hiw-panel-text">
+          <h3>Preview every detail</h3>
+          <p>Quickly flip through real rendered previews of your recipients before committing to sending.</p>
+        </div>
+        <div class="hiw-panel-anim anim-preview">
+           <div class="mock-window">
+            <div class="mock-header"><span></span><span></span><span></span></div>
+            <div class="mock-body"><div class="mock-canvas"><div class="mock-box" id="animName">Alice Johnson</div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="hiw-panel" id="panel-4">
+        <div class="hiw-panel-text">
+          <h3>Send instantly</h3>
+          <p>Connect your email provider and watch the live progress bar as beautiful certificates land in their inboxes.</p>
+        </div>
+        <div class="hiw-panel-anim anim-send">
+           <div class="mock-window">
+            <div class="mock-header"><span></span><span></span><span></span></div>
+            <div class="mock-body"><div class="mock-bar-track"><div class="mock-bar-fill"></div></div><div class="mock-status">Sending 45/100...</div></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -107,32 +147,32 @@
 
     <div class="features-grid">
       <div class="feature-tile">
-        <div class="feature-tile-icon">🖼️</div>
+        <img src="/static/images/feature_designer.png" alt="Designer" class="feature-img" />
         <h3>Visual certificate designer</h3>
         <p>Drag text fields to exactly the right position on your background. Choose fonts, sizes, colors, and alignment per field.</p>
       </div>
       <div class="feature-tile">
-        <div class="feature-tile-icon">📋</div>
+        <img src="/static/images/feature_excel.png" alt="Excel CSV Support" class="feature-img" />
         <h3>Excel / CSV support</h3>
         <p>Works with any spreadsheet. Required columns: Name, Email, Course/Event, Date. Download our sample to see the format.</p>
       </div>
       <div class="feature-tile">
-        <div class="feature-tile-icon">📧</div>
+        <img src="/static/images/feature_email.png" alt="Email Providers" class="feature-img" />
         <h3>3 email providers</h3>
         <p>Send via Gmail (App Password), any custom SMTP server, or AWS SES for high-volume sending at minimal cost.</p>
       </div>
       <div class="feature-tile">
-        <div class="feature-tile-icon">⚡</div>
+        <img src="/static/images/feature_progress.png" alt="Real-time progress" class="feature-img" />
         <h3>Real-time progress</h3>
         <p>Watch a live stream as each certificate is generated and delivered. Per-recipient success/failure status shown instantly.</p>
       </div>
       <div class="feature-tile">
-        <div class="feature-tile-icon">🔒</div>
+        <img src="/static/images/feature_security.png" alt="Security Control" class="feature-img" />
         <h3>Your credentials, your control</h3>
         <p>Email credentials are never stored on the server — they're used only during the send session and discarded immediately.</p>
       </div>
       <div class="feature-tile">
-        <div class="feature-tile-icon">☁️</div>
+        <img src="/static/images/feature_cloud.png" alt="Cloud Architecture" class="feature-img" />
         <h3>Cloud-ready architecture</h3>
         <p>Deployable on Railway in minutes. Uses PostgreSQL and Cloudflare R2 for reliable, scalable storage at near-zero cost.</p>
       </div>
@@ -181,6 +221,39 @@
     <a href="#how-it-works">How it works</a>
   </div>
 </footer>
+
+{% block scripts %}
+<script>
+  let hiwTimer;
+  let currSlide = 1;
+  const tabs = document.querySelectorAll('.hiw-tab');
+  const panels = document.querySelectorAll('.hiw-panel');
+  function switchSlide(n) {
+    tabs.forEach(t => t.classList.remove('active'));
+    panels.forEach(p => p.classList.remove('active'));
+    const targetTab = document.querySelector(`.hiw-tab[data-slide="${n}"]`);
+    if(targetTab) targetTab.classList.add('active');
+    const targetPanel = document.getElementById(`panel-${n}`);
+    if(targetPanel) targetPanel.classList.add('active');
+    currSlide = n;
+  }
+  tabs.forEach(t => {
+    t.addEventListener('click', () => {
+      clearInterval(hiwTimer);
+      switchSlide(parseInt(t.dataset.slide));
+      startAuto();
+    });
+  });
+  function startAuto() {
+    hiwTimer = setInterval(() => {
+      let next = currSlide + 1;
+      if (next > 4) next = 1;
+      switchSlide(next);
+    }, 5000);
+  }
+  startAuto();
+</script>
+{% endblock %}
 
 </body>
 </html>

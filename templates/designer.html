@@ -1,121 +1,432 @@
 {% extends "base.html" %}
 {% set active_step = 'designer' %}
 {% set active_step_index = 1 %}
+{% set show_steps = false %}
+{% block body_class %}ds-full-page{% endblock %}
 {% block title %}Design Template — CertifyAuto{% endblock %}
 
 {% block content %}
-<div class="designer-layout">
+<!-- Designer fills the full viewport below the app-header -->
+<div class="ds-root" id="dsRoot">
 
-  <!-- Sidebar -->
-  <aside class="designer-sidebar">
-    <h2>Template Designer</h2>
-
-    <section class="sidebar-section">
-      <h4>Background Image</h4>
-      <div class="bg-upload-row">
-        <label class="btn btn-outline btn-sm" for="bgInput" style="cursor:pointer">Upload background</label>
-        <input type="file" id="bgInput" accept=".png,.jpg,.jpeg" hidden />
+  <!-- ══ TOP BAR ════════════════════════════════════════════════════════════ -->
+  <header class="ds-topbar">
+    <div class="ds-topbar-left">
+      <a href="/" class="ds-back-btn" title="Back to home">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </a>
+      <div class="ds-title-wrap">
+        <input type="text" id="designName" class="ds-title-input" value="My Certificate Design" maxlength="80" />
       </div>
-      <div id="bgList" class="bg-list"></div>
-    </section>
-
-    <section class="sidebar-section">
-      <h4>Canvas Size</h4>
-      <div class="form-row">
-        <label>Width<input type="number" id="canvasW" value="1200" min="400" max="4000" /></label>
-        <label>Height<input type="number" id="canvasH" value="850" min="300" max="3000" /></label>
+    </div>
+    <div class="ds-topbar-center">
+      <button class="ds-tb-btn" id="undoBtn" title="Undo (Ctrl+Z)" disabled>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+      </button>
+      <button class="ds-tb-btn" id="redoBtn" title="Redo (Ctrl+Y)" disabled>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13"/></svg>
+      </button>
+      <div class="ds-tb-sep"></div>
+      <div class="ds-papersize-group">
+        <span class="ds-papersize-label">Paper Size:</span>
+        <button class="ds-paper-btn active" data-w="1200" data-h="850" id="paperA4Btn">A4</button>
+        <button class="ds-paper-btn" data-w="1100" data-h="850" id="paperLetterBtn">US Letter</button>
+        <button class="ds-paper-btn ds-paper-btn--info" id="paperInfoBtn" title="Canvas dimensions">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8"/><line x1="12" y1="12" x2="12" y2="16"/></svg>
+        </button>
       </div>
-      <button class="btn btn-outline btn-sm" id="applySize" style="margin-top:0.5rem">Apply</button>
-    </section>
+    </div>
+    <div class="ds-topbar-right">
+      <button class="ds-tb-btn ds-preview-btn" id="previewTopBtn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Preview
+      </button>
+      <button class="btn btn-primary btn-sm" id="saveTemplateBtn">Save &rarr;</button>
+    </div>
+  </header>
 
-    <section class="sidebar-section">
-      <h4>Add Fonts</h4>
-      <div class="font-add-row">
-        <input type="text" id="googleFontInput"
-               placeholder="e.g. Playfair Display" style="flex:1" />
-        <button class="btn btn-outline btn-sm" id="addGoogleFontBtn">Add</button>
+  <!-- ══ BODY = ICON SIDEBAR + PANEL + CANVAS + PROPERTIES ═════════════════ -->
+  <div class="ds-body">
+
+    <!-- ── Icon Sidebar ─────────────────────────────────────────────────────── -->
+    <nav class="ds-icon-sidebar">
+      <button class="ds-icon-btn active" data-panel="templates" id="navTemplates" title="Templates">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>
+        <span>Templates</span>
+      </button>
+      <button class="ds-icon-btn" data-panel="uploads" id="navUploads" title="Uploads">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="8 12 12 8 16 12"/><line x1="12" y1="8" x2="12" y2="16"/></svg>
+        <span>Uploads</span>
+      </button>
+      <button class="ds-icon-btn" data-panel="elements" id="navElements" title="Elements">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="3"/><rect x="13" y="5" width="6" height="6" rx="1"/><polygon points="8 14 11 21 5 21"/><rect x="13" y="14" width="6" height="3" rx="1"/><rect x="13" y="18" width="6" height="3" rx="1"/></svg>
+        <span>Elements</span>
+      </button>
+      <button class="ds-icon-btn" data-panel="text" id="navText" title="Text">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+        <span>Text</span>
+      </button>
+      <button class="ds-icon-btn" data-panel="attributes" id="navAttributes" title="Attributes">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="7" width="5" height="5" rx="1"/><rect x="3" y="15" width="5" height="5" rx="1"/><line x1="11" y1="9.5" x2="21" y2="9.5"/><line x1="11" y1="17.5" x2="21" y2="17.5"/></svg>
+        <span>Attributes</span>
+      </button>
+      <button class="ds-icon-btn" data-panel="layers" id="navLayers" title="Layers">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 12 12 17 22 12"/><polyline points="2 17 12 22 22 17"/></svg>
+        <span>Layers</span>
+      </button>
+      <button class="ds-icon-btn" data-panel="fonts" id="navFonts" title="Fonts">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><text x="4" y="18" font-size="16" font-weight="bold" font-family="serif" fill="currentColor" stroke="none">Aa</text></svg>
+        <span>Fonts</span>
+      </button>
+    </nav>
+
+    <!-- ── Slide-out Content Panel ──────────────────────────────────────────── -->
+    <aside class="ds-panel" id="dsPanel">
+
+      <!-- TEMPLATES panel -->
+      <div class="ds-panel-content active" id="panel-templates">
+        <div class="ds-panel-header">
+          <h3>Templates</h3>
+          <button class="ds-panel-close" id="closePanelBtn">✕</button>
+        </div>
+        <div class="ds-panel-search">
+          <input type="text" placeholder="Search templates…" id="tmplSearch" />
+        </div>
+        <div class="ds-filter-chips" id="tmplFilters">
+          <button class="ds-chip active" data-cat="all">All</button>
+          <button class="ds-chip" data-cat="classic">Classic</button>
+          <button class="ds-chip" data-cat="modern">Modern</button>
+          <button class="ds-chip" data-cat="corporate">Corporate</button>
+        </div>
+        <div class="ds-template-grid" id="tmplGrid">
+          <div class="ds-loader"><div class="spinner"></div> Loading…</div>
+        </div>
       </div>
-      <p class="text-small text-muted" style="margin:0.4rem 0 0.6rem">
-        Type any <a href="https://fonts.google.com" target="_blank" style="color:var(--accent)">Google Fonts</a>
-        family name above, or upload a local TTF / OTF file:
-      </p>
-      <label class="btn btn-outline btn-sm" for="fontFileInput" style="cursor:pointer;width:100%;justify-content:center">
-        Upload font file (.ttf / .otf)
-      </label>
-      <input type="file" id="fontFileInput" accept=".ttf,.otf,.woff,.woff2" hidden />
-      <div id="fontStatus" style="font-size:0.8rem;margin-top:0.5rem;display:none"></div>
-    </section>
 
-    <section class="sidebar-section">
-      <h4>Text Fields</h4>
-      <div id="fieldList" class="field-list"></div>
-      <button class="btn btn-outline btn-sm" id="addFieldBtn" style="width:100%">+ Add Text Field</button>
-    </section>
+      <!-- UPLOADS panel -->
+      <div class="ds-panel-content" id="panel-uploads">
+        <div class="ds-panel-header">
+          <h3>Uploads</h3>
+          <button class="ds-panel-close">✕</button>
+        </div>
+        <label class="ds-upload-zone" id="bgDropZone" for="bgInput">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span>Upload image<br/><small>.png, .jpg, .jpeg</small></span>
+        </label>
+        <input type="file" id="bgInput" accept=".png,.jpg,.jpeg" hidden multiple />
+        <div class="ds-uploads-grid" id="bgList"></div>
+      </div>
 
-    <section class="sidebar-section" id="fieldEditor" style="display:none">
-      <h4>Edit Field</h4>
-      <div class="form-group">
-        <label>Variable</label>
+      <!-- ELEMENTS panel -->
+      <div class="ds-panel-content" id="panel-elements">
+        <div class="ds-panel-header">
+          <h3>Elements</h3>
+          <button class="ds-panel-close">✕</button>
+        </div>
+        <p class="ds-panel-sub">Add shapes and decorative elements</p>
+        <div class="ds-section-label">Lines</div>
+        <div class="ds-elem-grid ds-elem-grid--wide">
+          <button class="ds-elem-btn" data-elem="hline" title="Horizontal line">—</button>
+          <button class="ds-elem-btn" data-elem="vline" title="Vertical line">|</button>
+        </div>
+        <div class="ds-section-label">Shapes</div>
+        <div class="ds-elem-grid">
+          <button class="ds-elem-btn" data-elem="rect" title="Rectangle">▬</button>
+          <button class="ds-elem-btn" data-elem="rect-outline" title="Rectangle outline">⬜</button>
+          <button class="ds-elem-btn" data-elem="circle" title="Circle">●</button>
+          <button class="ds-elem-btn" data-elem="circle-outline" title="Circle outline">○</button>
+          <button class="ds-elem-btn" data-elem="triangle" title="Triangle">▲</button>
+          <button class="ds-elem-btn" data-elem="triangle-outline" title="Triangle outline">△</button>
+        </div>
+        <div class="ds-section-label">Decorative</div>
+        <div class="ds-elem-grid">
+          <button class="ds-elem-btn" data-elem="star" title="Star">★</button>
+          <button class="ds-elem-btn" data-elem="star-outline" title="Star outline">☆</button>
+          <button class="ds-elem-btn" data-elem="diamond" title="Diamond">◆</button>
+          <button class="ds-elem-btn" data-elem="seal" title="Seal">🏅</button>
+          <button class="ds-elem-btn" data-elem="laurel" title="Laurel wreath">🌿</button>
+          <button class="ds-elem-btn" data-elem="ribbon" title="Ribbon">🎀</button>
+        </div>
+      </div>
+
+      <!-- TEXT panel -->
+      <div class="ds-panel-content" id="panel-text">
+        <div class="ds-panel-header">
+          <h3>Text</h3>
+          <button class="ds-panel-close">✕</button>
+        </div>
+        <button class="ds-add-textbox-btn" id="addTextboxBtn">+ Add text box</button>
+        <div class="ds-section-label">Text Styles</div>
+        <div class="ds-textstyle-list">
+          <button class="ds-textstyle-btn" data-style="heading" id="addHeadingBtn">
+            <span style="font-size:1.3rem;font-weight:700">Add heading</span>
+          </button>
+          <button class="ds-textstyle-btn" data-style="subheading" id="addSubheadingBtn">
+            <span style="font-size:1rem;font-weight:600">Add subheading</span>
+          </button>
+          <button class="ds-textstyle-btn" data-style="body" id="addBodyBtn">
+            <span style="font-size:0.875rem">Add normal text</span>
+          </button>
+        </div>
+        <div class="ds-section-label">Combinations</div>
+        <div class="ds-combo-grid" id="combos">
+          <button class="ds-combo-btn" data-combo="cert-title">
+            <div style="font-size:0.75rem;font-weight:800;letter-spacing:0.1em;text-transform:uppercase">CERTIFICATE</div>
+            <div style="font-size:0.6rem;color:var(--text-3)">OF ACHIEVEMENT</div>
+          </button>
+          <button class="ds-combo-btn" data-combo="cert-name">
+            <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase">CERTIFICATE OF COMPLETION</div>
+            <div style="font-size:0.58rem;color:var(--text-3);margin-top:2px">{{ '{{Name}}' }}</div>
+          </button>
+          <button class="ds-combo-btn" data-combo="signature">
+            <div style="font-size:0.9rem;font-family:cursive;color:var(--text-2)">Signature</div>
+            <div style="font-size:0.6rem;font-weight:600;border-top:1px solid var(--border);padding-top:2px;margin-top:2px">Name Surname</div>
+            <div style="font-size:0.55rem;color:var(--text-3)">Program Mentor</div>
+          </button>
+          <button class="ds-combo-btn" data-combo="issue-date">
+            <div style="font-size:0.7rem;font-weight:600;letter-spacing:0.03em">{{ '{{Date}}' }}</div>
+            <div style="font-size:0.55rem;color:var(--text-3);border-top:1px solid var(--border);margin-top:2px;padding-top:2px">Issue Date</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- ATTRIBUTES panel -->
+      <div class="ds-panel-content" id="panel-attributes">
+        <div class="ds-panel-header">
+          <h3>Attributes</h3>
+          <button class="ds-panel-close">✕</button>
+        </div>
+        <p class="ds-panel-sub">Dynamic placeholders replaced per-recipient</p>
+        <div class="ds-attr-list" id="attrList">
+          <button class="ds-attr-pill" data-var="{{ '{{Name}}' }}">
+            <span class="ds-attr-pill-tag">{{ '{{Name}}' }}</span>
+            <span class="ds-attr-pill-label">Recipient name</span>
+            <span class="ds-attr-pill-icon">+</span>
+          </button>
+          <button class="ds-attr-pill" data-var="{{ '{{Email}}' }}">
+            <span class="ds-attr-pill-tag">{{ '{{Email}}' }}</span>
+            <span class="ds-attr-pill-label">Email address</span>
+            <span class="ds-attr-pill-icon">+</span>
+          </button>
+          <button class="ds-attr-pill" data-var="{{ '{{Course/Event}}' }}">
+            <span class="ds-attr-pill-tag">{{ '{{Course}}' }}</span>
+            <span class="ds-attr-pill-label">Course / Event name</span>
+            <span class="ds-attr-pill-icon">+</span>
+          </button>
+          <button class="ds-attr-pill" data-var="{{ '{{Date}}' }}">
+            <span class="ds-attr-pill-tag">{{ '{{Date}}' }}</span>
+            <span class="ds-attr-pill-label">Issue date</span>
+            <span class="ds-attr-pill-icon">+</span>
+          </button>
+          <button class="ds-attr-pill ds-attr-pill--required" data-var="{{ '{{CertID}}' }}">
+            <span class="ds-attr-pill-tag">{{ '{{CertID}}' }}</span>
+            <span class="ds-attr-pill-label">Certificate ID <span class="ds-required-badge">required</span></span>
+            <span class="ds-attr-pill-icon">+</span>
+          </button>
+        </div>
+        <div class="ds-section-label" style="margin-top:1.25rem">Custom field</div>
+        <div class="ds-inline-row" style="gap:0.45rem">
+          <input type="text" id="customAttrInput" placeholder="e.g. Department" style="flex:1" />
+          <button class="btn btn-outline btn-sm" id="addCustomAttrBtn">Add</button>
+        </div>
+      </div>
+
+      <!-- LAYERS panel -->
+      <div class="ds-panel-content" id="panel-layers">
+        <div class="ds-panel-header">
+          <h3>Layers</h3>
+          <button class="ds-panel-close">✕</button>
+        </div>
+        <p class="ds-panel-sub">Drag to reorder · Click to select</p>
+        <div class="ds-layers-list" id="layersList"></div>
+      </div>
+
+      <!-- FONTS panel -->
+      <div class="ds-panel-content" id="panel-fonts">
+        <div class="ds-panel-header">
+          <h3>Fonts</h3>
+          <button class="ds-panel-close">✕</button>
+        </div>
+        <div class="ds-section-label">Add Google Font</div>
+        <div class="ds-inline-row">
+          <input type="text" id="googleFontInput" placeholder="e.g. Playfair Display" style="flex:1" />
+          <button class="btn btn-outline btn-sm" id="addGoogleFontBtn">Add</button>
+        </div>
+        <p class="text-small text-muted" style="margin:0.5rem 0 0.75rem">
+          Any <a href="https://fonts.google.com" target="_blank" style="color:var(--accent)">Google Fonts</a> family name
+        </p>
+        <div class="ds-section-label">Upload Font File</div>
+        <label class="ds-upload-zone ds-upload-zone--sm" for="fontFileInput">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span>Upload .ttf / .otf / .woff</span>
+        </label>
+        <input type="file" id="fontFileInput" accept=".ttf,.otf,.woff,.woff2" hidden />
+        <div id="fontStatus" class="ds-font-status" style="display:none"></div>
+        <div class="ds-section-label" style="margin-top:1rem">Loaded Fonts</div>
+        <div class="ds-font-list" id="fontList">
+          {% for f in fonts %}
+          <div class="ds-font-row"><span>{{ f.display_name }}</span></div>
+          {% endfor %}
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- ── Canvas Workspace ──────────────────────────────────────────────────── -->
+    <main class="ds-workspace" id="dsWorkspace">
+      <div class="ds-zoom-controls">
+        <button class="ds-zoom-btn" id="zoomOutBtn" title="Zoom out">−</button>
+        <span class="ds-zoom-val" id="zoomVal">100%</span>
+        <button class="ds-zoom-btn" id="zoomInBtn" title="Zoom in">+</button>
+        <button class="ds-zoom-btn" id="zoomFitBtn" title="Fit to screen" style="padding:0 8px;font-size:0.72rem">Fit</button>
+      </div>
+
+      <!-- Canvas wrapper (scrollable with checkerboard bg) -->
+      <div class="ds-canvas-outer" id="canvasOuter">
+        <div class="ds-canvas-scaler" id="canvasScaler">
+          <div class="ds-canvas-shadow">
+            <canvas id="certCanvas" width="1200" height="850"></canvas>
+            <!-- HTML overlay for interactive field handles -->
+            <div class="ds-fields-overlay" id="fieldsOverlay"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ── Right Properties Panel ────────────────────────────────────────────── -->
+    <aside class="ds-props" id="dsProps" style="display:none">
+      <div class="ds-props-header">
+        <span id="propsTitle">Text Field</span>
+        <button class="ds-props-close" id="propsCloseBtn">✕</button>
+      </div>
+
+      <!-- Field props -->
+      <div class="ds-props-body" id="fieldPropsBody">
+        <div class="ds-section-label">Variable</div>
         <select id="fVariable">
-          <option value="{{ '{{Name}}' }}">Name</option>
-          <option value="{{ '{{Email}}' }}">Email</option>
-          <option value="{{ '{{Course/Event}}' }}">Course / Event</option>
-          <option value="{{ '{{Date}}' }}">Date</option>
+          <option value="{{ '{{Name}}' }}">{{ '{{Name}}' }} – Recipient name</option>
+          <option value="{{ '{{Email}}' }}">{{ '{{Email}}' }} – Email</option>
+          <option value="{{ '{{Course/Event}}' }}">{{ '{{Course/Event}}' }} – Course / Event</option>
+          <option value="{{ '{{Date}}' }}">{{ '{{Date}}' }} – Date</option>
+          <option value="{{ '{{CertID}}' }}">{{ '{{CertID}}' }} – Certificate ID</option>
           <option value="Custom">Custom text…</option>
         </select>
-      </div>
-      <div class="form-group" id="customTextRow" style="display:none">
-        <label>Custom Text</label>
-        <input type="text" id="fCustomText" placeholder="Static text" />
-      </div>
-      <div class="form-group">
-        <label>Font</label>
+        <div id="customTextRow" style="display:none;margin-top:0.65rem">
+          <div class="ds-section-label">Custom Text</div>
+          <input type="text" id="fCustomText" placeholder="Static text on every certificate" />
+        </div>
+
+        <div class="ds-section-label" style="margin-top:1rem">Font</div>
         <select id="fFont">
           {% for f in fonts %}
           <option value="{{ f.id }}">{{ f.display_name }}</option>
           {% endfor %}
         </select>
-      </div>
-      <div class="form-row" style="margin-bottom:1rem">
-        <label>Size<input type="number" id="fSize" value="48" min="8" max="200" /></label>
-        <label>Color<input type="color" id="fColor" value="#ffffff" /></label>
-      </div>
-      <div class="form-group">
-        <label>Align</label>
-        <select id="fAlign">
-          <option value="center">Center</option>
-          <option value="left">Left</option>
-          <option value="right">Right</option>
-        </select>
-      </div>
-      <button class="btn btn-danger btn-sm" id="deleteFieldBtn" style="width:100%">Delete Field</button>
-    </section>
 
-    <section class="sidebar-section">
-      <h4>Template Name</h4>
-      <input type="text" id="templateName" placeholder="e.g. Workshop Certificate 2026" />
-    </section>
+        <div class="ds-prop-row" style="margin-top:0.85rem">
+          <div>
+            <div class="ds-section-label">Size</div>
+            <input type="number" id="fSize" value="48" min="8" max="300" />
+          </div>
+          <div>
+            <div class="ds-section-label">Color</div>
+            <div class="ds-color-row">
+              <input type="color" id="fColor" value="#1a1a2e" />
+              <input type="text" id="fColorHex" value="#1a1a2e" style="flex:1;width:auto" maxlength="7" />
+            </div>
+          </div>
+        </div>
 
-    <div class="sidebar-actions">
-      <button class="btn btn-primary" id="saveTemplateBtn" style="width:100%">Save &amp; Preview →</button>
-    </div>
-  </aside>
+        <div class="ds-section-label" style="margin-top:0.85rem">Alignment</div>
+        <div class="ds-align-btns">
+          <button class="ds-align-btn active" data-align="left" title="Left">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+          </button>
+          <button class="ds-align-btn" data-align="center" title="Center">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="10" x2="6" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="18" y1="18" x2="6" y2="18"/></svg>
+          </button>
+          <button class="ds-align-btn" data-align="right" title="Right">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="7" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/></svg>
+          </button>
+        </div>
 
-  <!-- Canvas -->
-  <div class="canvas-container">
-    <p class="canvas-hint">Drag text fields to reposition them &nbsp;·&nbsp; Click a field to edit its properties</p>
-    <canvas id="certCanvas" width="1200" height="850"></canvas>
-  </div>
+        <div class="ds-section-label" style="margin-top:0.85rem">Bold / Italic</div>
+        <div class="ds-style-btns">
+          <button class="ds-style-btn" id="fBold" title="Bold"><b>B</b></button>
+          <button class="ds-style-btn" id="fItalic" title="Italic"><em>I</em></button>
+          <button class="ds-style-btn" id="fUnderline" title="Underline"><u>U</u></button>
+        </div>
+
+        <div class="ds-section-label" style="margin-top:0.85rem">Letter Spacing</div>
+        <div class="ds-inline-row">
+          <input type="range" id="fLetterSpacing" min="-5" max="30" value="0" step="0.5" style="flex:1" />
+          <span class="ds-range-val" id="fLetterSpacingVal">0</span>
+        </div>
+
+        <div class="ds-section-label" style="margin-top:0.85rem">Line Height</div>
+        <div class="ds-inline-row">
+          <input type="range" id="fLineHeight" min="0.8" max="3" value="1.2" step="0.05" style="flex:1" />
+          <span class="ds-range-val" id="fLineHeightVal">1.2</span>
+        </div>
+
+        <div class="ds-section-label" style="margin-top:0.85rem">Opacity</div>
+        <div class="ds-inline-row">
+          <input type="range" id="fOpacity" min="0" max="100" value="100" step="1" style="flex:1" />
+          <span class="ds-range-val" id="fOpacityVal">100%</span>
+        </div>
+
+        <div class="ds-section-label" style="margin-top:0.85rem">Position</div>
+        <div class="ds-prop-row">
+          <div>
+            <label style="font-size:0.72rem;color:var(--text-3);display:block;margin-bottom:3px">X %</label>
+            <input type="number" id="fPosX" value="50" min="0" max="100" step="0.1" />
+          </div>
+          <div>
+            <label style="font-size:0.72rem;color:var(--text-3);display:block;margin-bottom:3px">Y %</label>
+            <input type="number" id="fPosY" value="50" min="0" max="100" step="0.1" />
+          </div>
+        </div>
+
+        <button class="btn btn-danger btn-sm" id="deleteFieldBtn" style="width:100%;margin-top:1.25rem">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+          Delete Field
+        </button>
+      </div>
+    </aside>
+
+  </div><!-- /ds-body -->
+
+</div><!-- /ds-root -->
+
+<!-- ── Floating element toolbar (appears above selected element) ── -->
+<div class="ds-float-toolbar" id="floatToolbar" style="display:none">
+  <button class="ds-ft-btn" id="ftDuplicate" title="Duplicate">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+  </button>
+  <button class="ds-ft-btn" id="ftBringFront" title="Bring to front">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="13" height="13" rx="1"/><path d="M8 8V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-3"/></svg>
+  </button>
+  <button class="ds-ft-btn" id="ftDelete" title="Delete">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+  </button>
+  <div class="ds-ft-sep"></div>
+  <button class="ds-ft-btn ds-ft-more" id="ftMore" title="More options">···</button>
+</div>
+
+<!-- ── Placeholder tooltip ── -->
+<div class="ds-placeholder-tip" id="placeholderTip" style="display:none">
+  <div class="ds-tip-content" id="tipContent"></div>
 </div>
 
 <input type="hidden" id="sessionId" value="{{ session_id }}" />
 {% endblock %}
 
 {% block scripts %}
-<script>const FONTS = {{ fonts | tojson }};
-/* FONT_CSS_MAP: font-id → {css_family, bold, source, filename} */
-const FONT_CSS_MAP = {};
-FONTS.forEach(f => { FONT_CSS_MAP[f.id] = f; });
+<script>
+  const FONTS = {{ fonts | tojson }};
+  const FONT_CSS_MAP = {};
+  FONTS.forEach(f => { FONT_CSS_MAP[f.id] = f; });
 </script>
 <script src="/static/js/designer.js"></script>
 {% endblock %}

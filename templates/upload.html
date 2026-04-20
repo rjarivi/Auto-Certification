@@ -8,6 +8,28 @@
   <h2>Upload your Excel file</h2>
   <p class="text-muted">Your spreadsheet must include these columns: <strong style="color:var(--text)">Name, Email, Course/Event, Date</strong></p>
 
+  <div id="errors" class="alert alert-error" style="display:none"></div>
+  <div id="loader" class="loader" style="display:none">
+    <div class="spinner"></div> Parsing file…
+  </div>
+
+  <div id="resultSection" style="display:none; margin-bottom: 2rem;">
+    <div class="action-row" style="margin-bottom: 1rem; justify-content: space-between; align-items: center;">
+      <div>
+        <span id="rowCount" class="badge badge-success"></span>
+        <span id="warnCount" class="badge badge-warn" style="display:none"></span>
+      </div>
+      <button id="proceedBtn" class="btn btn-primary" disabled>Continue to Designer →</button>
+    </div>
+    <div class="table-wrap">
+      <table id="dataTable">
+        <thead><tr id="tableHead"></tr></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <p class="text-small text-muted" style="margin-top:-0.5rem">Showing up to 10 rows preview.</p>
+  </div>
+
   <div class="upload-zone" id="dropZone">
     <div class="upload-icon">📂</div>
     <p>Drag &amp; drop your <strong>.xlsx</strong> file here, or</p>
@@ -16,32 +38,12 @@
     <p class="text-small text-muted" style="margin-top:0.5rem">Max size: 16 MB &nbsp;·&nbsp; .xlsx / .xls only</p>
   </div>
 
-  <div id="errors" class="alert alert-error" style="display:none"></div>
-  <div id="loader" class="loader" style="display:none">
-    <div class="spinner"></div> Parsing file…
-  </div>
-
-  <div id="resultSection" style="display:none">
-    <div class="result-header">
-      <span id="rowCount" class="badge badge-success"></span>
-      <span id="warnCount" class="badge badge-warn" style="display:none"></span>
+  <div class="sample-download" style="margin-top: 1.5rem;">
+    <p class="text-small text-muted" style="margin-bottom:0.65rem">Need a template? Use our sample data with 1 click.</p>
+    <div style="display: flex; gap: 0.5rem; justify-content: center;">
+      <button id="useSampleBtn" class="btn btn-outline btn-sm">✨ Use Sample Data</button>
+      <a href="/static/sample_data.xlsx" download class="btn btn-outline btn-sm" style="opacity: 0.8;">⬇ Download Excel</a>
     </div>
-    <div class="table-wrap">
-      <table id="dataTable">
-        <thead><tr id="tableHead"></tr></thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-    </div>
-    <p class="text-small text-muted" style="margin-top:-0.5rem;margin-bottom:1rem">Showing up to 10 rows preview.</p>
-    <div class="action-row">
-      <span></span>
-      <button id="proceedBtn" class="btn btn-primary" disabled>Continue to Designer →</button>
-    </div>
-  </div>
-
-  <div class="sample-download">
-    <p class="text-small text-muted" style="margin-bottom:0.65rem">Need a template? Download our sample file.</p>
-    <a href="/static/sample_data.xlsx" download class="btn btn-outline btn-sm">⬇ Download sample Excel</a>
   </div>
 </div>
 {% endblock %}

@@ -21,8 +21,31 @@
     const file = e.dataTransfer.files[0];
     if (file) uploadFile(file);
   });
-  dropZone.addEventListener('click', () => fileInput.click());
+  dropZone.addEventListener('click', e => {
+    if (e.target.tagName === 'LABEL' || e.target.tagName === 'INPUT') return;
+    fileInput.click();
+  });
   fileInput.addEventListener('change', () => { if (fileInput.files[0]) uploadFile(fileInput.files[0]); });
+
+  const useSampleBtn = document.getElementById('useSampleBtn');
+  if (useSampleBtn) {
+    useSampleBtn.addEventListener('click', () => {
+      errorsDiv.style.display = 'none';
+      resultSec.style.display = 'none';
+      loader.style.display    = 'flex';
+      
+      fetch('/static/sample_data.xlsx')
+        .then(res => {
+          if (!res.ok) throw new Error('Sample data file not found');
+          return res.blob();
+        })
+        .then(blob => {
+          const file = new File([blob], 'sample_data.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+          uploadFile(file);
+        })
+        .catch(err => showError('Failed to load sample data: ' + err.message));
+    });
+  }
 
   function uploadFile(file) {
     errorsDiv.style.display = 'none';

@@ -1,0 +1,18 @@
+{
+  "Italianno": {
+    "display_name": "Italianno",
+    "css_family": "\"Italianno\", serif",
+    "bold": false,
+    "source": "google",
+    "filename": "Italianno.ttf",
+    "google_family": "Italianno"
+  },
+  "Inter": {
+    "display_name": "Inter",
+    "css_family": "\"Inter\", serif",
+    "bold": false,
+    "source": "google",
+    "filename": "Inter.ttf",
+    "google_family": "Inter"
+  }
+}

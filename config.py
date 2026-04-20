@@ -32,7 +32,7 @@ USE_DB = bool(DATABASE_URL)
 
 # ── Local-dev fallback paths (used only when USE_S3 / USE_DB are False) ───────
 UPLOAD_FOLDER     = os.path.join(BASE_DIR, 'uploads', 'excel')
-BACKGROUND_FOLDER = os.path.join(BASE_DIR, 'assets', 'backgrounds')
+BACKGROUND_FOLDER = os.path.join(BASE_DIR, 'backgrounds')
 TEMPLATE_FOLDER   = os.path.join(BASE_DIR, 'data', 'templates')
 SESSION_FOLDER    = os.path.join(BASE_DIR, 'data', 'sessions')
 OUTPUT_FOLDER     = os.path.join(BASE_DIR, 'output')

@@ -389,21 +389,68 @@ def _draw_tech_achievement_v():
     return img
 
 
+# ── Template 10 & 11: Custom Excellence (From Upload) ─────────────────────────
+
+def _draw_custom_excellence_h():
+    # Load the uploaded image from the workspace backgrounds/ folder
+    path = os.path.join(config.BASE_DIR, 'backgrounds', 'media__1776678325207.png')
+    img = Image.open(path).convert('RGB')
+    
+    # We resize it to standard 1200x850 resolution so everything matches
+    img = img.resize((1200, 850), Image.LANCZOS)
+    return img
+
+
+def _draw_custom_excellence_v():
+    path = os.path.join(config.BASE_DIR, 'backgrounds', 'media__1776678382447.png')
+    img = Image.open(path).convert('RGB')
+    img = img.resize((850, 1200), Image.LANCZOS)
+    return img
+
+
+# ── Template 12 & 13: Yellow & Purple Custom ──────────────────────────────────
+
+def _draw_yp_excellence_h():
+    path = os.path.join(config.BASE_DIR, 'backgrounds', 'Yello_Blue_landscape.png')
+    if not os.path.exists(path):
+        # fallback just in case
+        img = Image.new('RGB', (1200, 850), _rgb('#FFFFFF'))
+    else:
+        img = Image.open(path).convert('RGB')
+        img = img.resize((1200, 850), Image.LANCZOS)
+    return img
+
+def _draw_yp_excellence_v():
+    path = os.path.join(config.BASE_DIR, 'backgrounds', 'Yello_Blue_landscape.png')
+    if not os.path.exists(path):
+        img = Image.new('RGB', (850, 1200), _rgb('#FFFFFF'))
+    else:
+        img = Image.open(path).convert('RGB')
+        # Rotate the landscape version to act as portrait
+        img = img.rotate(90, expand=True)
+        img = img.resize((850, 1200), Image.LANCZOS)
+    return img
+
+
 # ── Text field helper ─────────────────────────────────────────────────────────
 
 def _tf(variable, x_pct, y_pct, font_family, font_size, color_hex,
-        align='center', max_width=80):
+        align='center', bold=False, italic=False, letterSpacing=0, locked=True, max_width=80):
     var_id = (variable.replace('{', '').replace('}', '')
                        .replace('/', '_').replace(' ', '_').lower())
     return {
-        'id': f'field_{var_id}',
-        'variable': variable,
-        'font_family': font_family,
-        'font_size': font_size,
-        'color_hex': color_hex,
-        'align': align,
-        'x_percent': x_pct,
-        'y_percent': y_pct,
+        'id':            f'field_{var_id}',
+        'variable':      variable,
+        'x_percent':     x_pct,
+        'y_percent':     y_pct,
+        'font_family':   font_family,
+        'font_size':     font_size,
+        'color_hex':     color_hex,
+        'align':         align,
+        'bold':          bold,
+        'italic':        italic,
+        'letterSpacing': letterSpacing,
+        'locked':        locked,
         'max_width_percent': max_width,
     }
 
@@ -553,6 +600,78 @@ BUILTIN_TEMPLATES = [
             _tf('{{Name}}',         50, 38, 'DejaVuSans-Bold', 54, '#00D4FF'),
             _tf('{{Course/Event}}', 50, 50, 'DejaVuSans',      28, '#F0F6FC'),
             _tf('{{Date}}',         50, 61, 'DejaVuSans',      20, '#8B949E'),
+        ],
+    },
+    {
+        'template_id':  'builtin_custom_excellence_h',
+        'name':         'Custom Excellence',
+        'category':     'modern',
+        'orientation':  'horizontal',
+        'width':        1200,
+        'height':       850,
+        'background_id': 'builtin_custom_excellence_h.png',
+        'thumb_key':    'builtin_thumbs/builtin_custom_excellence_h.png',
+        'draw_fn':      _draw_custom_excellence_h,
+        'text_fields':  [
+            _tf('Certificate',      50, 20, 'Italianno',       120, '#D97706'),
+            _tf('of excellence',    50, 32, 'Inter',           30,  '#111827'),
+            _tf('{{Name}}',         50, 48, 'DejaVuSerif-Bold', 60, '#111827'),
+            _tf('{{Course/Event}}', 50, 60, 'Inter',           28,  '#374151'),
+            _tf('{{Date}}',         50, 75, 'Inter',           20,  '#6B7280'),
+        ],
+    },
+    {
+        'template_id':  'builtin_custom_excellence_v',
+        'name':         'Custom Excellence (Portrait)',
+        'category':     'modern',
+        'orientation':  'vertical',
+        'width':        850,
+        'height':       1200,
+        'background_id': 'builtin_custom_excellence_v.png',
+        'thumb_key':    'builtin_thumbs/builtin_custom_excellence_v.png',
+        'draw_fn':      _draw_custom_excellence_v,
+        'text_fields':  [
+            _tf('Certificate',      50, 20, 'Italianno',       110, '#D97706'),
+            _tf('of excellence',    50, 29, 'Inter',           26,  '#111827'),
+            _tf('{{Name}}',         50, 45, 'DejaVuSerif-Bold', 54, '#111827'),
+            _tf('{{Course/Event}}', 50, 56, 'Inter',           24,  '#374151'),
+            _tf('{{Date}}',         50, 70, 'Inter',           18,  '#6B7280'),
+        ],
+    },
+    {
+        'template_id':  'builtin_yp_excellence_h',
+        'name':         'Yellow & Purple Excellence',
+        'category':     'modern',
+        'orientation':  'horizontal',
+        'width':        1200,
+        'height':       850,
+        'background_id': 'builtin_yp_excellence_h.png',
+        'thumb_key':    'builtin_thumbs/builtin_yp_excellence_h.png',
+        'draw_fn':      _draw_yp_excellence_h,
+        'text_fields':  [
+            _tf('Certificate',      50, 24, 'Italianno',       120, '#581C87'),
+            _tf('of excellence',    50, 36, 'Inter',           30,  '#111827'),
+            _tf('{{Name}}',         50, 56, 'DejaVuSerif-Bold', 60, '#111827'),
+            _tf('{{Course/Event}}', 50, 68, 'Inter',           28,  '#374151'),
+            _tf('{{Date}}',         50, 78, 'Inter',           20,  '#6B7280'),
+        ],
+    },
+    {
+        'template_id':  'builtin_yp_excellence_v',
+        'name':         'Yellow & Purple Excellence (Portrait)',
+        'category':     'modern',
+        'orientation':  'vertical',
+        'width':        850,
+        'height':       1200,
+        'background_id': 'builtin_yp_excellence_v.png',
+        'thumb_key':    'builtin_thumbs/builtin_yp_excellence_v.png',
+        'draw_fn':      _draw_yp_excellence_v,
+        'text_fields':  [
+            _tf('Certificate',      50, 24, 'Italianno',       110, '#581C87'),
+            _tf('of excellence',    50, 33, 'Inter',           26,  '#111827'),
+            _tf('{{Name}}',         50, 54, 'DejaVuSerif-Bold', 54, '#111827'),
+            _tf('{{Course/Event}}', 50, 66, 'Inter',           24,  '#374151'),
+            _tf('{{Date}}',         50, 78, 'Inter',           18,  '#6B7280'),
         ],
     },
 ]
